@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
-import { YoutubeTranscript } from "youtube-transcript";
+import VideoUpload from "@/components/VideoUpload";
 
 function LectureToNotesPage() {
     const router = useRouter();
@@ -24,16 +24,33 @@ function LectureToNotesPage() {
         }
     })
 const isLoadig = form.formState.isSubmitting;
-const onSubmit = async (values: z.infer<typeof formSchema>) => {
+const handleYouTubeSubmit = async (values: z.infer<typeof formSchema>) => {
    
-    YoutubeTranscript
     try {
         const response = await axios.post("/api/transcript", {
             videoUrl: values.prompt, // User's input from the form
         });
 
         if (response) {
-            console.log("Transcript:", response);
+            console.log("Transcript:", response.data);
+            try {
+                const userMessage: ChatCompletionMessageParam = {
+                    role: "user",
+                    content: values.prompt
+                };
+                const newMessages = [...messages, userMessage];
+            
+                const openaiResponse = await axios.post("/api/lecture-to-notes", {
+                    messages: newMessages, transcript: response.data
+                });
+                setMessages((current) => [...current, userMessage, openaiResponse.data]);
+                form.reset();
+               } catch (error: any) {
+                console.log(error);
+            
+               }finally{
+                router.refresh();
+               }
             // Do something with the transcript, e.g., display it or process into notes
         } else {
             console.error("Error:", response);
@@ -44,24 +61,16 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
         alert("An error occurred while processing the YouTube link.");
     }
 };
-//    try {
-//     const userMessage: ChatCompletionMessageParam = {
-//         role: "user",
-//         content: values.prompt
-//     };
-//     const newMessages = [...messages, userMessage];
+const handleVideoUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append('video', file);
 
-//     const response = await axios.post("/api/lecture-to-notes", {
-//         messages: newMessages
-//     });
-//     setMessages((current) => [...current, userMessage, response.data]);
-//     form.reset();
-//    } catch (error: any) {
-//     console.log(error);
+    const response = await axios.post("/api/audio-to-text",formData, {
+    })
+    const result = await response.data;
+    console.log(result);
 
-//    }finally{
-//     router.refresh();
-//    }
+ }
 
   return (
     <div>
@@ -72,9 +81,9 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
         iconColor='text-rose-500'
         bgColor='bg-rose-500/10'/>
         <div className='px-4 lg:px-8 '>
-            <div>
+            <div>  
      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}
+        <form onSubmit={form.handleSubmit(handleYouTubeSubmit)}
         className="rounded-lg border w-full p-4 px-3 md:px-6 focus-within:shadow-sm grid grid-cols-12 gap-2">
             <FormField
             name="prompt"
@@ -82,7 +91,7 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
                 <FormItem className="col-span-12 lg:col-span-10">
                     <FormControl className="m-0 p-0">
                         <Input className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent" disabled={isLoadig}
-                        placeholder="Hi"
+                        placeholder="Enter youtube URL"
                         {...field}/>
                     </FormControl>
                 </FormItem>
@@ -94,6 +103,9 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
         </form>
 
     </Form>
+    </div>
+    <div>
+        <VideoUpload onUpload={handleVideoUpload}/>
     </div>
     <div className="space-y-4 mt-4">
         <div className="flex flex-col-reverse gap-y-4">
