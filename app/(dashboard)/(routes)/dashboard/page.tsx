@@ -4,8 +4,11 @@ import { cn } from '@/lib/utils'
 import { ArrowRight, BookCheck, Brain, MicrochipIcon, Settings, StickyNote } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React from 'react'
+import { useSession } from "next-auth/react";
+
 
 export default function page() {
+  const {data: session} = useSession();
   const router = useRouter();
   const tools = [
     
@@ -48,7 +51,7 @@ export default function page() {
     <div>
       <div className='mb-8 space-y-4'>
         <h2 className='text 2xl: md:text-4xl font-bold text-center'>
-          Welcome to Focusify
+          Welcome to Focusify 
         </h2>
         <p className='text-muted-foreground font-light text-sm md:text-lg text-center'>
           Chat with the smartest AI

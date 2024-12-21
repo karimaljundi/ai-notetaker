@@ -2,6 +2,7 @@
 import React, { useRef, useState } from 'react';
 import { Button } from "@/components/ui/button"; // Adjust the import based on your UI library
 import { getSignedURL } from '@/app/create/action';
+import { transcribeVideo } from '@/app/api/transcript/action';
 const VideoUpload = ({ onUpload }: any) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [content, setContent] = useState("");
@@ -37,9 +38,11 @@ const VideoUpload = ({ onUpload }: any) => {
             const url = signedURLResult.success?.url;
             await fetch(url!, {method: "PUT", body: file, headers: {"Content-Type": file.type},});
             console.log(url);
-    
+            const jobName = `transcription-${Array.from(crypto.getRandomValues(new Uint8Array(8)), byte => byte.toString(16).padStart(2, '0')).join('')}`;
+            const transcription = await transcribeVideo(jobName, url!);
             setStatusMessage("created");
             setLoading(false);
+            console.log('transcription created',transcription );
         }
         
     };

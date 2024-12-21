@@ -3,8 +3,12 @@ import { Button } from '@/components/ui/button'
 import { Menu } from 'lucide-react'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import Sidebar from '@/components/sidebar'
+import { useSession } from 'next-auth/react'
+import Image from 'next/image'
+import { doLogin, doLogout } from '@/app/actions'
 
 export default function MobileSidebar() {
+  const {data:session} = useSession()
   return (
     <Sheet>
       <SheetTrigger asChild>

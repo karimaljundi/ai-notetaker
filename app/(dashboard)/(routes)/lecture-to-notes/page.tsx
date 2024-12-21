@@ -13,6 +13,8 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import VideoUpload from "@/components/VideoUpload";
+import prisma from "@/lib/prismadb";
+import { handleAddNote } from "./actions";
 
 function LectureToNotesPage() {
     const router = useRouter();
@@ -40,13 +42,19 @@ const handleYouTubeSubmit = async (values: z.infer<typeof formSchema>) => {
                 };
                 const newMessages = [...messages, userMessage];
             
-                const openaiResponse = await axios.post("/api/lecture-to-notes", {
-                    messages: newMessages, transcript: response.data
-                });
-                setMessages((current) => [...current, userMessage, openaiResponse.data]);
+                // const openaiResponse = await axios.post("/api/lecture-to-notes", {
+                //     messages: newMessages, transcript: response.data
+                // });
+                setMessages((current) => [...current, userMessage
+                    // , openaiResponse.data
+                    ]);
+                // const noteResponse = await axios.post("/api/notes", { content: openaiResponse.data });
+                // console.log("Note added:", noteResponse.data);
+                // const noteAdded = await handleAddNote("Lecture Notes", response.data, user?.emailAddresses[0].emailAddress.toString());
+            //    console.log("Note added:", noteAdded);
+
                 form.reset();
                } catch (error: any) {
-                console.log(error);
             
                }finally{
                 router.refresh();
@@ -61,16 +69,16 @@ const handleYouTubeSubmit = async (values: z.infer<typeof formSchema>) => {
         alert("An error occurred while processing the YouTube link.");
     }
 };
-const handleVideoUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append('video', file);
+// const handleVideoUpload = async (file: File) => {
+//     const formData = new FormData();
+//     formData.append('video', file);
 
-    const response = await axios.post("/api/audio-to-text",formData, {
-    })
-    const result = await response.data;
-    console.log(result);
+//     const response = await axios.post("/api/audio-to-text",formData, {
+//     })
+//     const result = await response.data;
+//     console.log(result);
 
- }
+//  }
 
   return (
     <div>
@@ -105,7 +113,7 @@ const handleVideoUpload = async (file: File) => {
     </Form>
     </div>
     <div>
-        <VideoUpload onUpload={handleVideoUpload}/>
+        {/* <VideoUpload onUpload={handleVideoUpload}/> */}
     </div>
     <div className="space-y-4 mt-4">
         <div className="flex flex-col-reverse gap-y-4">
