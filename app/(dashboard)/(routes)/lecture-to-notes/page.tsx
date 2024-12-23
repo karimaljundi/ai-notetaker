@@ -14,11 +14,14 @@ import { useRouter } from "next/navigation";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import VideoUpload from "@/components/VideoUpload";
 import prisma from "@/lib/prismadb";
-import { handleAddNote } from "./actions";
+import { addNote } from "@/lib/handleNote";
+import { useSession } from "next-auth/react";
 
 function LectureToNotesPage() {
     const router = useRouter();
+    const {data: session} = useSession();
     const [messages, setMessages] = React.useState<ChatCompletionMessageParam[]>([]);
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver:zodResolver(formSchema),
         defaultValues: {
@@ -30,29 +33,41 @@ const handleYouTubeSubmit = async (values: z.infer<typeof formSchema>) => {
    
     try {
         const response = await axios.post("/api/transcript", {
+            userId: session?.user?.id,
             videoUrl: values.prompt, // User's input from the form
         });
 
         if (response) {
             console.log("Transcript:", response.data);
             try {
-                const userMessage: ChatCompletionMessageParam = {
-                    role: "user",
-                    content: values.prompt
-                };
-                const newMessages = [...messages, userMessage];
-            
+                // const userMessage: ChatCompletionMessageParam = {
+                //     role: "user",
+                //     content: values.prompt
+                // };
+                const newMessages = [...messages
+                    // , userMessage
+                ];
                 // const openaiResponse = await axios.post("/api/lecture-to-notes", {
+                //     userId: session?.user?.id as string,
                 //     messages: newMessages, transcript: response.data
                 // });
-                setMessages((current) => [...current, userMessage
-                    // , openaiResponse.data
+                setMessages((current) => [...current, 
+                    // userMessage,openaiResponse.data
                     ]);
-                // const noteResponse = await axios.post("/api/notes", { content: openaiResponse.data });
-                // console.log("Note added:", noteResponse.data);
-                // const noteAdded = await handleAddNote("Lecture Notes", response.data, user?.emailAddresses[0].emailAddress.toString());
-            //    console.log("Note added:", noteAdded);
-
+                console.log("UserId",session);
+                const noteResponse = await fetch('/api/notes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: session?.user?.email, title: "Lecture Notes", content: response.data }),
+                  });
+                const noteResponseData = await noteResponse.json();
+                console.log("Note added to database", noteResponseData);
+                const getNotesByEmail = await fetch('/api/notes', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: session?.user?.email }),
+                  });
+                    console.log("Notes retrieved from database", getNotesByEmail.json());
                 form.reset();
                } catch (error: any) {
             

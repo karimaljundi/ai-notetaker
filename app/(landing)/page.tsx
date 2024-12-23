@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import Link  from 'next/link'
 import React from 'react'
-import LoginForm from '@/components/LoginForm'
+import LoginForm from '@/components/ProvidersForm'
 
 const LandingPage = () => {
   return (

@@ -1,32 +1,30 @@
+'use server'
 import { NextApiRequest, NextApiResponse } from 'next';
-import prisma from '@/lib/prismadb';
+import { addNote, getNotesByEmail } from '@/lib/handleNote';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method === 'POST') {
-        return await POST(req, res);
-    } else if (req.method === 'GET') {
-        return await GET(req, res);
-    } else {
-        res.setHeader('Allow', ['POST', 'GET']);
-        res.status(405).end(`Method ${req.method} Not Allowed`);
-    }
+export async function POST(req: Request, res: Response) {
+   try{ const { title, content, email } = await req.json();
+    console.log("In route file: ", title, email);
+    const note = await addNote(title, content, email);
+    console.log("Note added to database", note);
+    console.log("status 200");
+    return new Response(JSON.stringify(note), {status: 201});
 }
-
-async function POST(req: NextApiRequest, res: NextApiResponse) {
-    const { content } = req.body;
-    try {
-        const note = await prisma.note.create({ data:  content  });
-        res.status(201).json(note);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to create note' });
-    }
+    catch{
+        console.log("status 500");
+        return new Response(JSON.stringify({error: "Failed to add note"}), {status: 500});
+    }  
 }
-
-async function GET(req: NextApiRequest, res: NextApiResponse) {
-    try {
-        const notes = await prisma.note.findMany();
-        res.status(200).json(notes);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch notes' });
+export async function GET(req: Request, res: Response) {
+    try{
+        const { email } = await req.json();
+        console.log("In route file GET: ", email);
+        const notes = await getNotesByEmail(email);
+        console.log("status 200");
+        return new Response(JSON.stringify(notes), {status: 200});
+    }
+    catch{
+        console.log("status 500");
+        return new Response(JSON.stringify({error: "Failed to get notes"}), {status: 500});
     }
 }

@@ -4,7 +4,7 @@ import { BookCheck, Brain, LayoutDashboard, MicrochipIcon, Settings, StickyNote 
 import { Montserrat } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { redirect, usePathname } from 'next/navigation';
 import React from 'react';
 import { useSession } from 'next-auth/react';
 import { doLogin, doLogout } from '@/app/actions';
@@ -87,7 +87,7 @@ const Sidebar = () => {
         </form>
           </div>
         ) : (
-          <form action={doLogin}>
+          <form action={redirect('/sign-in')}>
         <button type="submit" name="action" value="google" className="text-sm text-gray-400 hover:text-white">Sign In</button>
           </form>
         )}

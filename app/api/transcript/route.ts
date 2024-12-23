@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { YoutubeTranscript } from "youtube-transcript"; // Ensure you have this package installed
 import he from "he";
-export async function POST(req: Request) {
+import { useSession } from "next-auth/react";
+export async function POST(req: Request, userId: string) {
     try {
-        const { userId } = await auth();
         const body = await req.json();
         const { videoUrl } = body; // Expecting videoUrl from the request body
         let compiledTranscript = "";

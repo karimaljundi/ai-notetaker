@@ -1,17 +1,55 @@
-import { doLogin, doLogout } from "@/app/actions"
+"use client";
+import React from "react";
+import AuthButton from "./AuthButton";
+import { loginWithCreds } from "@/app/actions/index";
+// import { loginWithCreds } from "@/actions/auth";
 
- 
-export default function LoginForm() {
+const LoginForm: React.FC = () => {
   return (
-    <>
-    <form action={doLogin}>
-      <button type="submit" name="action" value="google">Signin with Google</button>
-    </form>
+    <div>
+      <form action={loginWithCreds} className="w-full flex flex-col gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-200">
+            Name
+          </label>
+          <input
+            type="text"
+            placeholder="Name"
+            id="name"
+            name="name"
+            className="mt-1 w-full px-4 p-2 h-10 rounded-md border border-gray-200 bg-white text-sm text-gray-700"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-200">
+            Email
+          </label>
+          <input
+            type="email"
+            placeholder="Email"
+            id="Email"
+            name="email"
+            className="mt-1 w-full px-4 p-2 h-10 rounded-md border border-gray-200 bg-white text-sm text-gray-700"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-200">
+            Password
+          </label>
+          <input
+            type="password"
+            placeholder="Password"
+            name="password"
+            id="password"
+            className="mt-1 w-full px-4 p-2 h-10 rounded-md border border-gray-200 bg-white text-sm text-gray-700"
+          />
+        </div>
+        <div className="mt-4">
+          <AuthButton />
+        </div>
+      </form>
+    </div>
+  );
+};
 
-  <form action={doLogin}>
-  <button type="submit" name="action" value="apple">Signin with Apple</button>
-  </form>
-  </>
-  )
-
-} 
+export default LoginForm;
