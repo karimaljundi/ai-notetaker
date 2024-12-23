@@ -21,12 +21,9 @@ function LectureToNotesPage() {
     const router = useRouter();
     const {data: session} = useSession();
     const [messages, setMessages] = React.useState<ChatCompletionMessageParam[]>([]);
-    interface Note {
-        title: string;
-        content: string;
-    }
 
-    const [notes, setNotes] = useState<Note[]>([]);
+
+    const [notes, setNotes] = useState<any[]>([]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver:zodResolver(formSchema),
@@ -45,7 +42,12 @@ const isLoadig = form.formState.isSubmitting;
             const response = await axios.get('/api/notes', {
                 params: { email: session?.user?.email }
             });
-            setNotes(response.data);
+            if (Array.isArray(response.data)) {
+                console.log("You are an array")
+                setNotes(response.data); // Ensure response data is an array
+            } else {
+                console.error("Error: Notes data is not an array");
+            }
         } catch (error) {
             console.error("Error fetching notes:", error);
         }
