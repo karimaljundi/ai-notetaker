@@ -44,7 +44,7 @@ export const loginWithCreds = async (formData: FormData): Promise<void> => {
   
     try {
       await signIn("credentials", rawFormData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof AuthError) {
         switch (error.type) {
           case "CredentialsSignin":

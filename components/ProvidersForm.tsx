@@ -1,4 +1,4 @@
-import { doLogin, doLogout } from "@/app/actions"
+import { doLogin } from "@/app/actions"
 import { FaGoogle, FaApple } from "react-icons/fa";
 
 

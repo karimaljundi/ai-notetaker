@@ -4,11 +4,9 @@ import { cn } from '@/lib/utils'
 import { ArrowRight, BookCheck, Brain, MicrochipIcon, Settings, StickyNote } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React from 'react'
-import { useSession } from "next-auth/react";
 
 
-export default function page() {
-  const {data: session} = useSession();
+export default function Page() {
   const router = useRouter();
   const tools = [
     

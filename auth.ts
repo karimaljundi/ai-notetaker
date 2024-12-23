@@ -33,7 +33,7 @@ export const {
                 return null;
             }
             const email = credentials.email as string;
-            const hash = saltAndHashPassword(credentials.password);
+            const hash = saltAndHashPassword(credentials.password.toString());
             const name = credentials.name as string;
 
             let user = await db.user.findUnique({where: {email}});

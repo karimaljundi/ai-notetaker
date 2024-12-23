@@ -3,12 +3,12 @@ import React, { useRef, useState } from 'react';
 import { Button } from "@/components/ui/button"; // Adjust the import based on your UI library
 import { getSignedURL } from '@/app/create/action';
 import { transcribeVideo } from '@/app/api/transcript/action';
-const VideoUpload = ({ onUpload }: any) => {
+const VideoUpload = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [content, setContent] = useState("");
+    // const [content, setContent] = useState("");
     const [file, setFile] = useState<File | undefined>(undefined);
-    const [statusMessage, setStatusMessage] = useState("");
-    const [loading, setLoading] = useState(false);
+    // const [statusMessage, setStatusMessage] = useState("");
+    // const [loading, setLoading] = useState(false);
     const [fileURL, setFileURL] = useState<string | undefined>(undefined);
 
     const computeSHA256 = async (file: File) => {
@@ -22,17 +22,17 @@ const VideoUpload = ({ onUpload }: any) => {
       };
     const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        setStatusMessage("creating");
-        setLoading(true);
+        // setStatusMessage("creating");
+        // setLoading(true);
 
-        console.log({content, file})
+        // console.log({content, file})
         if (file){
-            setStatusMessage("uploading");
+            // setStatusMessage("uploading");
             const checkSum = await computeSHA256(file);
             const signedURLResult = await getSignedURL(file.type, file.size, checkSum);
             if (signedURLResult.failure!=undefined){
-                setStatusMessage("failed");
-                setLoading(false);
+                // setStatusMessage("failed");
+                // setLoading(false);
                 console.log("error")
             }
             const url = signedURLResult.success?.url;
@@ -40,8 +40,8 @@ const VideoUpload = ({ onUpload }: any) => {
             console.log(url);
             const jobName = `transcription-${Array.from(crypto.getRandomValues(new Uint8Array(8)), byte => byte.toString(16).padStart(2, '0')).join('')}`;
             const transcription = await transcribeVideo(jobName, url!);
-            setStatusMessage("created");
-            setLoading(false);
+            // setStatusMessage("created");
+            // setLoading(false);
             console.log('transcription created',transcription );
         }
         

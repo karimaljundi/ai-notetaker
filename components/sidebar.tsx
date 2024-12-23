@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { redirect, usePathname } from 'next/navigation';
 import React from 'react';
 import { useSession } from 'next-auth/react';
-import { doLogin, doLogout } from '@/app/actions';
+import { doLogout } from '@/app/actions';
 
 const montserrat = Montserrat({
   weight: "600",

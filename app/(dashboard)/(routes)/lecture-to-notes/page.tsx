@@ -2,7 +2,7 @@
 import * as z from "zod";
 import { Heading } from '@/components/header'
 import { MicrochipIcon } from 'lucide-react'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { formSchema } from "./constants";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,15 +12,21 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
-import VideoUpload from "@/components/VideoUpload";
-import prisma from "@/lib/prismadb";
-import { addNote } from "@/lib/handleNote";
 import { useSession } from "next-auth/react";
+import { v4 as uuidv4 } from 'uuid';
+import { Card } from "@/components/ui/card";
+
 
 function LectureToNotesPage() {
     const router = useRouter();
     const {data: session} = useSession();
     const [messages, setMessages] = React.useState<ChatCompletionMessageParam[]>([]);
+    interface Note {
+        title: string;
+        content: string;
+    }
+
+    const [notes, setNotes] = useState<Note[]>([]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver:zodResolver(formSchema),
@@ -29,6 +35,21 @@ function LectureToNotesPage() {
         }
     })
 const isLoadig = form.formState.isSubmitting;
+    useEffect(() => {
+        if (session?.user?.email) {
+            fetchNotes();
+        }
+    },[]);
+    const fetchNotes = async () => {
+        try {
+            const response = await axios.get('/api/notes', {
+                params: { email: session?.user?.email }
+            });
+            setNotes(response.data);
+        } catch (error) {
+            console.error("Error fetching notes:", error);
+        }
+    };
 const handleYouTubeSubmit = async (values: z.infer<typeof formSchema>) => {
    
     try {
@@ -40,41 +61,35 @@ const handleYouTubeSubmit = async (values: z.infer<typeof formSchema>) => {
         if (response) {
             console.log("Transcript:", response.data);
             try {
-                // const userMessage: ChatCompletionMessageParam = {
-                //     role: "user",
-                //     content: values.prompt
-                // };
-                const newMessages = [...messages
-                    // , userMessage
-                ];
-                // const openaiResponse = await axios.post("/api/lecture-to-notes", {
-                //     userId: session?.user?.id as string,
-                //     messages: newMessages, transcript: response.data
-                // });
+                const userMessage: ChatCompletionMessageParam = {
+                    role: "user",
+                    content: values.prompt
+                };
+                const newMessages = [...messages,userMessage];
+                const openaiResponse = await axios.post("/api/lecture-to-notes", {
+                    userId: session?.user?.id as string,
+                    messages: newMessages, transcript: response.data
+                });
                 setMessages((current) => [...current, 
-                    // userMessage,openaiResponse.data
+                    userMessage,openaiResponse.data.content
                     ]);
-                console.log("UserId",session);
+                const uniqueTitle = `Lecture Notes - ${uuidv4()}`;
+
                 const noteResponse = await fetch('/api/notes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: session?.user?.email, title: "Lecture Notes", content: response.data }),
+                    body: JSON.stringify({ email: session?.user?.email, title: uniqueTitle, content: openaiResponse.data.content}),
                   });
                 const noteResponseData = await noteResponse.json();
                 console.log("Note added to database", noteResponseData);
-                const getNotesByEmail = await fetch('/api/notes', {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: session?.user?.email }),
-                  });
-                    console.log("Notes retrieved from database", getNotesByEmail.json());
+                fetchNotes();
                 form.reset();
-               } catch (error: any) {
-            
+               } catch (error: unknown) {
+                console.error("Error:", error);
+                alert("An error occurred while processing the transcript.");
                }finally{
                 router.refresh();
                }
-            // Do something with the transcript, e.g., display it or process into notes
         } else {
             console.error("Error:", response);
             alert("Failed to fetch transcript.");
@@ -132,13 +147,26 @@ const handleYouTubeSubmit = async (values: z.infer<typeof formSchema>) => {
     </div>
     <div className="space-y-4 mt-4">
         <div className="flex flex-col-reverse gap-y-4">
-            {messages.map((message) =>(
-                <div key={typeof message.content === 'string' ? message.content : JSON.stringify(message.content)}>
+            {messages.map((message, index) =>(
+                <div key={index}>
                     {typeof message.content === 'string' ? message.content : JSON.stringify(message.content)}
                 </div>
             ))}
         </div>
     </div>
+    <div className="mt-8">
+                    <h2 className="text-xl font-bold">Your Notes</h2>
+                    <ul>
+                        {notes.map((note) => (
+                            <Card key={note.title} className="border p-2 my-2">
+                                <h3 className="font-bold">{note.title}</h3>
+                                <div className="overflow-hidden max-h-16">
+                                    <p className="line-clamp-3">{note.content}</p>
+                                </div>
+                            </Card>
+                        ))}
+                    </ul>
+                </div>
         </div>
     </div>
   )

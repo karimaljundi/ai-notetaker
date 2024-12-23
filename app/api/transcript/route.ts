@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { YoutubeTranscript } from "youtube-transcript"; // Ensure you have this package installed
+import { YoutubeTranscript } from "youtube-transcript"; 
 import he from "he";
-import { useSession } from "next-auth/react";
+import fs from 'fs';
+import path from 'path';
 export async function POST(req: Request, userId: string) {
     try {
         const body = await req.json();
@@ -30,8 +31,7 @@ export async function POST(req: Request, userId: string) {
         for (let i = 0; i < cleanedTranscript.length; i++) {
             compiledTranscript += cleanedTranscript[i].text + " ";
         }
-        const fs = require('fs');
-        const path = require('path');
+
         const transcriptDir = path.join(__dirname, 'transcripts');
         if (!fs.existsSync(transcriptDir)) {
             fs.mkdirSync(transcriptDir);
