@@ -42,6 +42,7 @@
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.0.3",
     "youtube-transcript": "^1.2.1",
+    "youtubei.js": "^12.2.0",
     "ytdl-core": "^4.11.5",
     "zod": "^3.24.1"
   },
