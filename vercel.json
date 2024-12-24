@@ -1,0 +1,8 @@
+{
+    "functions": {
+      "api/lecture-to-notes/route.ts": {
+        "maxDuration": 60
+      }
+    }
+  }
+  
