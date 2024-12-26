@@ -43,7 +43,7 @@ const isLoadig = form.formState.isSubmitting;
                 params: { email: session?.user?.email }
             });
             if (Array.isArray(response.data)) {
-                console.log("You are an array")
+                // console.log("You are an array")
                 setNotes(response.data); // Ensure response data is an array
             } else {
                 console.error("Error: Notes data is not an array");
@@ -61,27 +61,30 @@ const handleYouTubeSubmit = async (values: z.infer<typeof formSchema>) => {
         });
 
         if (response) {
-            console.log("Transcript:", response.data);
+            // console.log("Transcript:", response.data);
             try {
                 const userMessage: ChatCompletionMessageParam = {
                     role: "user",
                     content: values.prompt
                 };
                 const newMessages = [...messages,userMessage];
+                const startTime = performance.now();
                 const openaiResponse = await axios.post("/api/lecture-to-notes", {
-                    userId: session?.user?.id as string,
                     messages: newMessages, transcript: response.data
                 });
+                const endTime = performance.now();
+                console.log(`API request took ${endTime - startTime} milliseconds`);
                 setMessages((current) => [...current, 
-                    userMessage,openaiResponse.data.content
+                    userMessage,
+                    openaiResponse.data
                     ]);
                 const uniqueTitle = `Lecture Notes - ${uuidv4()}`;
 
                 const noteResponse = await fetch('/api/notes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: session?.user?.email, title: uniqueTitle, content: openaiResponse.data.content}),
-                  });
+                    body: JSON.stringify({ type: "create" ,email: session?.user?.email, title: uniqueTitle, content: openaiResponse.data}),
+                });
                 const noteResponseData = await noteResponse.json();
                 console.log("Note added to database", noteResponseData);
                 fetchNotes();
@@ -151,7 +154,7 @@ const handleYouTubeSubmit = async (values: z.infer<typeof formSchema>) => {
         <div className="flex flex-col-reverse gap-y-4">
             {messages.map((message, index) =>(
                 <div key={index}>
-                    {typeof message.content === 'string' ? message.content : JSON.stringify(message.content)}
+                    {typeof message === 'string' ? message : JSON.stringify(message)}
                 </div>
             ))}
         </div>
@@ -161,10 +164,12 @@ const handleYouTubeSubmit = async (values: z.infer<typeof formSchema>) => {
                     <ul>
                         {notes.map((note) => (
                             <Card key={note.title} className="border p-2 my-2">
-                                <h3 className="font-bold">{note.title}</h3>
-                                <div className="overflow-hidden max-h-16">
-                                    <p className="line-clamp-3">{note.content}</p>
-                                </div>
+                                <a href={`/notes/${note.id}`} className="no-underline">
+                                    <h3 className="font-bold">{note.title}</h3>
+                                    <div className="overflow-hidden max-h-16">
+                                        <p className="line-clamp-3">{note.content}</p>
+                                    </div>
+                                </a>
                             </Card>
                         ))}
                     </ul>

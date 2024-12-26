@@ -1,6 +1,6 @@
 {
     "functions": {
-      "api/lecture-to-notes/**/*.ts": {
+      "app/api/lecture-to-notes/route.ts": {
         "maxDuration": 60
       }
     }

@@ -1,6 +1,15 @@
 import { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+  variants: {
+    extend: {
+      transform: ['hover', 'focus'],
+    },
+  },
   reactStrictMode: false,
   eslint: {
     ignoreDuringBuilds: true,
@@ -32,6 +41,8 @@ const nextConfig: NextConfig = {
           { key: "Access-Control-Allow-Origin", value: "http://localhost:3000" },
           { key: "Access-Control-Allow-Methods", value: "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
           { key: "Access-Control-Allow-Headers", value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" },
+
+
         ]
       }
     ]

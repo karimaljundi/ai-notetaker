@@ -14,7 +14,7 @@ export async function doLogin(formData: FormData){
         console.error("Action is null"); 
     }
 
-    console.log(action);
+    // console.log(action);
     revalidatePath("/dashboard");
 
 }
@@ -27,7 +27,7 @@ const getUserByEmail = async (email : string)=>{
         const user = await db.user.findUnique({where: {email,},});
         return user;
     } catch (error) {
-        console.log("Error:", error);
+        // console.log("Error:", error);
         return null;
     }
 }
@@ -41,7 +41,7 @@ export const loginWithCreds = async (formData: FormData): Promise<void> => {
     };
   
     const existingUser = await getUserByEmail(formData.get("email") as string);
-    console.log(existingUser);
+    // console.log(existingUser);
   
     try {
       await signIn("credentials", rawFormData);

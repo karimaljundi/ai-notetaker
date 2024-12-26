@@ -73,7 +73,7 @@ export const {
                     });
                     // user = await sql`INSERT INTO User (name, email, hashedPassword, Provider) VALUES (${name}, ${email}, ${hash}, 'Credentials')`;
                 } else {
-                    const isMatch = bcrypt.compareSync(credentials.password as string, user.hashedPassword);
+                    const isMatch = bcrypt.compareSync(credentials.password as string, user.hashedPassword?.toString() as string);
                     if (!isMatch) {
                         return new Error("Password does not match");
                     }

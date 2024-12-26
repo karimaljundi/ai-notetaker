@@ -8,31 +8,27 @@ const openai = new OpenAI({
 export async function POST(req: Request) {
 try {
     const body = await req.json();
-    console.log("Body", body);
    
     
     const {messages, transcript } = body;
-    // const user = await auth();
-    // const userId = user?.user?.id;
-    // console.log("User", user)
-    // if (!userId){
-    //   return new NextResponse("Unauthorized", { status: 401 });
-    // }
     if (!openai.apiKey){
         return new NextResponse("OpenAI Key not configured", { status: 500 });
     }
     if (!messages){
         return new NextResponse("Messages not provided", { status: 400 });
     }
+    // const brokenTranscript = chunkTranscriptBySentences(transcript);
+    // console.log("Broken Transcript", brokenTranscript);
     const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4-turbo",
         messages: [
             {
               "role": "system",
               "content": [
                 {
                   "type": "text",
-                  "text": "\nPrompt:\n1. Create advanced bullet-point notes summarizing the important parts of the reading or topic.\n2. Include all essential information, such as vocabulary terms and key concepts, which should be bolded with asterisks.\n3. Remove any extraneous language, focusing only on the critical aspects of the passage or topic.\n4. Strictly base your notes on the provided information, without adding any external information.\n5. Make the notes easy for me to understand, break down all the concept into smaller concepts. Provide links that could help me understand concepts but do not use them in writing your notes. \n6. Provide all examples the lecture notes use break down the examples and debug them all in a professor manner.\n7. Conclude your notes with [End of Notes] to indicate completion.\nBy following this prompt, you will help me better understand the material and prepare for any relevant exams or assessments. Here are the notes of my lecture: \n"
+                  "text": "Prompt:\n1. Create structured notes summarizing the important parts of the topic in a **JSON format**.\n2. Organize the JSON object into the following keys:\n   - **title**: The title of the lecture or topic.\n   - **sections**: An array of objects, where each object represents a section with:\n     - **title**: The title of the section.\n     - **content**: An array of strings, each string representing a key point in the section.\n     - **examples** (optional): An array of objects, where each object includes:\n       - **description**: A brief description of the example.\n       - **details**: An array of strings, each providing additional explanation or steps for the example.\n     - **conclusion** (optional): A string summarizing the insights from the section, if applicable.\n3. Format important vocabulary terms or key concepts as **bold** (e.g., `**term**`).\n4. Include mathematical formulas or technical terms in their proper format.\n5. Do not add any external information—strictly base the JSON on the provided content.\n6. Ensure the final JSON is valid and adheres to this structure.\n\n**Example JSON Output:**\n```json\n{\n  \"title\": \"Lecture Notes on [Topic]\",\n  \"sections\": [\n    {\n      \"title\": \"Section Title\",\n      \"content\": [\n        \"Key point 1.\",\n        \"Key point 2.\",\n        \"Key point 3.\"\n      ],\n      \"examples\": [\n        {\n          \"description\": \"Example description.\",\n          \"details\": [\n            \"Detail 1.\",\n            \"Detail 2.\",\n            \"Detail 3.\"\n          ]\n        }\n      ],\n      \"conclusion\": \"A summary of the section, if applicable.\"\n    }\n  ]\n}\n"
+
                 }
               ]
             },
@@ -43,7 +39,7 @@ try {
           ],
 
         response_format: {
-          "type": "text"
+          "type": "json_object"
           
         },
         temperature: 1,
@@ -52,10 +48,14 @@ try {
         frequency_penalty: 0,
         presence_penalty: 0
       });
-    return NextResponse.json(response.choices[0].message);
+      console.log("OpenAI Response", response.choices[0].message.content);
+      console.log("Response type", typeof response.choices[0].message.content);
+    return NextResponse.json(response.choices[0].message.content);
 } catch (error) {
-    console.log("[CONVERSION ERROR]", error);
+    // console.log("[CONVERSION ERROR]", error);
     return new NextResponse("Internal Server Error", { status: 500 });
     
 }
 }
+
+

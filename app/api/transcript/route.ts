@@ -50,7 +50,7 @@ export async function POST(req: Request, userId: string) {
         // console.log(transcript1);
         return NextResponse.json(compiledTranscript); // Return the cleaned transcript as JSON
     } catch (error) {
-        console.log("[TRANSCRIPT ERROR]", error);
+        // console.log("[TRANSCRIPT ERROR]", error);
         return new NextResponse("Internal Server Error", { status: 500 });
     }
 }

@@ -76,3 +76,12 @@ body {
     @apply bg-background text-foreground;
   }
 }
+.backface-hidden {
+  backface-visibility: hidden;
+}
+.perspective {
+  perspective: 1000px;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}

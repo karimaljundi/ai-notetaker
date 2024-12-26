@@ -33,16 +33,16 @@ const VideoUpload = () => {
             if (signedURLResult.failure!=undefined){
                 // setStatusMessage("failed");
                 // setLoading(false);
-                console.log("error")
+                // console.log("error")
             }
             const url = signedURLResult.success?.url;
             await fetch(url!, {method: "PUT", body: file, headers: {"Content-Type": file.type},});
-            console.log(url);
+            // console.log(url);
             const jobName = `transcription-${Array.from(crypto.getRandomValues(new Uint8Array(8)), byte => byte.toString(16).padStart(2, '0')).join('')}`;
             const transcription = await transcribeVideo(jobName, url!);
             // setStatusMessage("created");
             // setLoading(false);
-            console.log('transcription created',transcription );
+            // console.log('transcription created',transcription );
         }
         
     };

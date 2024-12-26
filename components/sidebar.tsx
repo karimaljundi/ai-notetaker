@@ -1,6 +1,6 @@
 "use client";
 import { cn } from '@/lib/utils';
-import { BookCheck, Brain, LayoutDashboard, MicrochipIcon, Settings, StickyNote } from 'lucide-react';
+import { BookAIcon, BookCheck, Brain, LayoutDashboard, MicrochipIcon, Settings, StickyNote } from 'lucide-react';
 import { Montserrat } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -20,6 +20,12 @@ const routes = [
     icon: LayoutDashboard,
     href: "/dashboard",
     color: "text-sky-500"
+  },
+  {
+    label: "Notes",
+    icon: BookAIcon,
+    href: "/notes",
+    color: "text-yellow-500"
   },
   {
     label: "Lecture to Notes",

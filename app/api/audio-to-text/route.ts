@@ -17,7 +17,7 @@ export async function POST(req: Request) {
             return new NextResponse("No valid video file provided", { status: 400 });
         }
 
-        console.log("formData", videoFile);
+        // console.log("formData", videoFile);
 
         if (!userId) {
             return new NextResponse("Unauthorized", { status: 401 });
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ transcript: transcription.text });
     } catch (error) {
-        console.log("[VIDEO UPLOAD ERROR]", error);
+        // console.log("[VIDEO UPLOAD ERROR]", error);
         return new NextResponse("Internal Server Error", { status: 500 });
     }
 }
