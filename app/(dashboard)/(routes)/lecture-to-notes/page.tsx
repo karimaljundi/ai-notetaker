@@ -164,7 +164,7 @@ const handleYouTubeSubmit = async (values: z.infer<typeof formSchema>) => {
                     <ul>
                         {notes.map((note) => (
                             <Card key={note.title} className="border p-2 my-2">
-                                <a href={`/notes/${note.id}`} className="no-underline">
+                                <a href={`lecture-to-notes/${note.id}`} className="no-underline">
                                     <h3 className="font-bold">{note.title}</h3>
                                     <div className="overflow-hidden max-h-16">
                                         <p className="line-clamp-3">{note.content}</p>

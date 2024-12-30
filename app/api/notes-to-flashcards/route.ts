@@ -8,8 +8,11 @@ const openai = new OpenAI({
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { messages, note } = body;
-        console.log("Received request body:", body);
+        const { messages, note, prompt } = body;
+        // console.log("Received request body:", body);
+        console.log("messages:", messages);
+        console.log("note:", note);
+        console.log("prompt in ai:", prompt);
 
         if (!openai.apiKey) {
             return new NextResponse("OpenAI Key not configured", { status: 500 });
@@ -107,7 +110,7 @@ End the response with a valid JSON object.`
                 },
                 {
                     role: "user",
-                    content: JSON.stringify(note)
+                    content: JSON.stringify(note) + "\n" + prompt + "\n" + JSON.stringify(messages)
                 }
             ],
             temperature: 1,

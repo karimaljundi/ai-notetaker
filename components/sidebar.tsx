@@ -22,12 +22,6 @@ const routes = [
     color: "text-sky-500"
   },
   {
-    label: "Notes",
-    icon: BookAIcon,
-    href: "/notes",
-    color: "text-yellow-500"
-  },
-  {
     label: "Lecture to Notes",
     icon: MicrochipIcon,
     href: "/lecture-to-notes",

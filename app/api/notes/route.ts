@@ -11,20 +11,10 @@ export async function POST(req: Request) {
         const { type, title, content, email, id, flashcards } = await req.json();
         console.log("Request type:", type);
         console.log("Request body:", title, content, email, id, flashcards);
-
-        if (type === "create") {
-            console.log("Creating note:", title, email);
-            const note = await addNote(title, content, email);
-            console.log("Note added to database", note);
-            return new Response(note, { status: 201 });
-        } else if (type === "update" && title===undefined && content===undefined && email===undefined) {
-            console.log("Updating note:", id);
-            const updatedNote = await updateNoteById(id, flashcards);
-            console.log("Note updated with flashcards", updatedNote);
-            return new Response(updatedNote, { status: 200 });
-        } else {
-            return new Response(JSON.stringify({ error: "Invalid request type" }), { status: 400 });
-        }
+        console.log("Creating note:", title, email);
+        const note = await addNote(title, content, email);
+        console.log("Note added to database", note);
+        return new Response(note, { status: 201 });
     } catch (error) {
         console.error("Error handling request:", error);
         return new Response(JSON.stringify({ error: "Failed to process request" }), { status: 500 });

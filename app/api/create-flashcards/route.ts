@@ -1,6 +1,6 @@
 'use server'
 
-import { addFlashcards } from '@/lib/handleNote';7
+import { addFlashcards } from '@/lib/handleNote';
 export async function POST(req: Request) {
     try {
         const {id, flashcards } = await req.json();

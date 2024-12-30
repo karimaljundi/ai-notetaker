@@ -47,15 +47,24 @@ export async function getNoteById(id: string){
     });
     return JSON.stringify(note);
 }
-export async function addFlashcards(noteId: string, flashcards: any){
-    console.log("flashcards", flashcards);
+export async function addFlashcards(noteId: string, flashcards: any) {
     console.log("noteId", noteId);
     console.log("flashcards type", typeof flashcards);
-    console.log("flashcard as an object", JSON.parse(flashcards));
-    const flashcardArray = JSON.parse(flashcards);
-    console.log("flashcardArray[0]", flashcardArray['flashcards']);
-    try{
-        
+
+    let flashcardArray;
+    if (typeof flashcards === 'string') {
+        try {
+            flashcardArray = JSON.parse(flashcards);
+            console.log('flashcards type after parsing:', typeof flashcardArray);
+        } catch (error) {
+            console.error("Error parsing flashcards:", error);
+            throw new Error("Invalid flashcards format");
+        }
+    } else {
+        flashcardArray = flashcards;
+    }
+
+    try {
         const manyFlashcards = await prisma.flashcard.createMany({
             data: flashcardArray['flashcards'].map((flashcard: any) => ({
                 question: flashcard.question,
@@ -73,11 +82,10 @@ export async function addFlashcards(noteId: string, flashcards: any){
                 flashcards: true
             }
         });
-        console.log("Note updated successfully:", note);
+        console.log("Updated note with flashcards:", note);
         return JSON.stringify(note);
-    }
-    catch (error) {
-        console.error("Error updating note:", error);
+    } catch (error) {
+        console.error("Error adding flashcards:", error);
         throw error;
     }
 }
@@ -112,5 +120,37 @@ export async function updateNoteById(id: string, flashcards: any) {
     } catch (error) {
         console.error("Error updating note:", error);
         throw error;
+    }
+}
+export async function deleteFlashcardById(id: string){
+    try {
+        const flashcard = await prisma.flashcard.delete({
+            where: {
+                id: id
+            }
+        });
+        console.log("Flashcard deleted successfully:", flashcard);
+        return JSON.stringify(flashcard);
+    } catch (error) {
+        console.error("Error deleting flashcard:", error);
+        throw error;
+    }
+}
+export async function updateFlashcardById(id: string, flashcard: any){
+    try {
+        
+        const updatedFlashcard = await prisma.flashcard.update({
+            where: {
+                id: id
+            },
+            data: {
+                ...flashcard
+            }
+        });
+        console.log("Flashcard updated successfully:", updatedFlashcard);
+        return JSON.stringify(updatedFlashcard);
+        
+    } catch (error) {
+        
     }
 }

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import React, { use, useEffect, useState } from 'react'
 import { set, useForm } from 'react-hook-form';
-import { formSchema } from '../../lecture-to-notes/constants';
+import { formSchema } from '../constants';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
