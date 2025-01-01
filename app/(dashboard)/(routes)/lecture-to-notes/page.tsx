@@ -1,7 +1,7 @@
 "use client";
 import * as z from "zod";
 import { Heading } from '@/components/header'
-import { MicrochipIcon } from 'lucide-react'
+import { GraduationCap } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { formSchema } from "./constants";
@@ -120,7 +120,7 @@ const handleYouTubeSubmit = async (values: z.infer<typeof formSchema>) => {
         <Heading
         title='Lecture to Notes'
         description='Convert your lectures to notes'
-        icon={MicrochipIcon}
+        icon={GraduationCap}
         iconColor='text-rose-500'
         bgColor='bg-rose-500/10'/>
         <div className='px-4 lg:px-8 '>

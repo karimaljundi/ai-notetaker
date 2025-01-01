@@ -8,13 +8,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 import Flashcard from '@/components/Flashcard';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Button } from "@/components/ui/button"
+import { ChevronDown, ChevronUp, BookOpen } from "lucide-react"
 
 
 function page({params}: {params: Promise<{ noteId: string }>}) {
     const [notes, setNotes] = useState<{ sections: any[] }>({ sections: [] });
     const [messages, setMessages] = React.useState<ChatCompletionMessageParam[]>([]);
     const [flashcards, setFlashcards] = React.useState<any[]>([]);
-    
+    const [expandedSections, setExpandedSections] = useState<number[]>([])
+
     const {noteId} = use(params)
     const {data: session} = useSession();
     const fetchNotes = async () => {
@@ -22,14 +28,9 @@ function page({params}: {params: Promise<{ noteId: string }>}) {
             const response = await axios.get('/api/notes', {
                 params: { id: noteId }
             });
-            console.log("response", response.data.content);
-            console.log("response as an object", JSON.parse(response.data.content));
+            console.log("response", (response.data.content));
+            // console.log("response as an object", JSON.parse(response.data.content));
             setNotes(JSON.parse(response.data.content));
-            const getFlashcards = await axios.get('/api/flashcards', {
-                params: { id: noteId }
-            });
-            console.log("response", getFlashcards.data);
-            setFlashcards(getFlashcards.data);
             
         }catch (error) {
             console.error("Error fetching notes:", error);
@@ -77,43 +78,35 @@ function page({params}: {params: Promise<{ noteId: string }>}) {
         }
     };
 
-
+    const toggleSection = (index: number) => {
+        setExpandedSections(prev => 
+            prev.includes(index) 
+                ? prev.filter(i => i !== index)
+                : [...prev, index]
+        )
+    }
     console.log("notes", notes.sections);
-    const formatText = (text: string) => {
-        const parts = text.split(/(\*\*.*?\*\*)/g);
-        return parts.map((part, index) => {
-            if (part.startsWith('**') && part.endsWith('**')) {
-                return <strong key={index}>{part.slice(2, -2)}</strong>;
-            }
-            return part;
-        });
-    };
-    
+    // const formatText = (text: string) => {
+    //     const parts = text.split(/(\*\*.*?\*\*)/g);
+    //     return parts.map((part, index) => {
+    //         if (part.startsWith('**') && part.endsWith('**')) {
+    //             return <strong key={index}>{part.slice(2, -2)}</strong>;
+    //         }
+    //         return part;
+    //     });
+    // };
+    console.log("notes", notes);
     return (
   
         <div className="p-4">
-            <form onSubmit={form.handleSubmit(onSubmit)} className="mb-4">
-                <input
-                    type="text"
-                    {...form.register("prompt")}
-                    placeholder="Enter prompt for flashcards"
-                    className="border p-2 mb-2 w-full"
-                />
-                <button
-                    type="submit"
-                    className="bg-blue-500 text-white p-2 rounded"
-                    disabled={isLoading}
-                >
-                    {isLoading ? "Creating..." : "Create Flashcards"}
-                </button>
-            </form>
+            
                 <h2 className="text-3xl font-bold mb-4">{notes.title}</h2>
                 {notes.sections.map((section: any, sectionIndex: number) => (
                     <div key={sectionIndex} className="mb-6">
                         <h3 className="text-2xl font-semibold mb-2">{section.title}</h3>
                         <ul className="list-disc list-inside mb-4">
                             {section.content.map((contentItem: string, contentIndex: number) => (
-                                <li key={contentIndex} className="text-lg mb-1">{formatText(contentItem)}</li>
+                                <li key={contentIndex} className="text-lg mb-1">{contentItem}</li>
                             ))}
                         </ul>
                         {section.examples && (
@@ -121,32 +114,19 @@ function page({params}: {params: Promise<{ noteId: string }>}) {
                                 <h4 className="text-xl font-medium mb-2">Examples:</h4>
                                 {section.examples.map((example: any, exampleIndex: number) => (
                                     <div key={exampleIndex} className="mb-2">
-                                        <p className="text-lg mb-1">{formatText(example.description)}</p>
+                                        <p className="text-lg mb-1">{example.description}</p>
                                         <ul className="list-disc list-inside">
                                             {example.details.map((detail: string, detailIndex: number) => (
-                                                <li key={detailIndex} className="text-base mb-1">{formatText(detail)}</li>
+                                                <li key={detailIndex} className="text-base mb-1">{detail}</li>
                                             ))}
                                         </ul>
                                     </div>
                                 ))}
                             </div>
                         )}
-                        {section.conclusion && <p className="text-lg font-semibold"><strong>Conclusion:</strong> {formatText(section.conclusion)}</p>}
+                        {section.conclusion && <p className="text-lg font-semibold"><strong>Conclusion:</strong> {section.conclusion}</p>}
                     </div>
                 ))}
-                    <div className="mt-8">
-        <h2 className="text-3xl font-bold mb-4">Flashcards</h2>
-        <ul className="list-disc list-inside">
-            {flashcards && flashcards.map((flashcard: any, flashcardIndex: number) => (
-                    <Flashcard
-                        key={flashcardIndex}
-                        front={flashcard.question}
-                        back={flashcard.answer}
-                        difficulty={flashcard.difficulty}/>
-            ))}
-        </ul>
-    </div>
-        
     </div>
             )
 

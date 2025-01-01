@@ -1,77 +1,128 @@
-"use client";
-import { Card } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
-import { ArrowRight, BookCheck, Brain, MicrochipIcon, Settings, StickyNote } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import React from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { BookText, FilePlus, Brain, GraduationCap, Clock, WalletCards as Cards } from "lucide-react"
+import Link from "next/link"
+import { useSession } from "next-auth/react"
 
-
-export default function Page() {
-  const router = useRouter();
-  const tools = [
-    
-    {
-      label: "Lecture to Notes",
-      icon: MicrochipIcon,
-      href: "/lecture-to-notes",
-      color: "text-rose-500",
-      bgColor: "bg-rose-500/10"
-    }
-    ,
-    {
-      label: "Notes to quiz",
-      icon: BookCheck,
-      href: "/notes-to-quiz",
-      color: "text-green-500",
-      bgColor: "bg-green-500/10"
-    },
-    {
-      label: "Notes to Flashcards",
-      icon: StickyNote,
-      href: "/notes-to-flashcards",
-      color: "text-yellow-500",
-      bgColor: "bg-yellow-500/10"
-    },
-    {
-      label: "Ask a Question",
-      icon: Brain,
-      href: "/ask-a-question",
-      color: "text-indigo-500",
-      bgColor: "bg-indigo-500/10"
-    },
-    {
-      label: "Settings",
-      icon: Settings,
-      href: "/settings"
-    }
-  ]
+export default async function DashboardPage() {
   return (
-    <div>
-      <div className='mb-8 space-y-4'>
-        <h2 className='text 2xl: md:text-4xl font-bold text-center'>
-          Welcome to Focusify 
-        </h2>
-        <p className='text-muted-foreground font-light text-sm md:text-lg text-center'>
-          Chat with the smartest AI
-        </p>
+    <div className="p-6 space-y-8">
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <Button asChild>
+          <Link href="/lecture-to-notes">
+            <FilePlus className="mr-2 h-4 w-4" />
+            New Note
+          </Link>
+        </Button>
       </div>
-      <div className='px-4 md:px-20 lg:px-32 space-y-4'>
-        {tools.map((tool) => (
-          <Card 
-          onClick={() => router.push(tool.href)}
-          key={tool.href}
-          className='p-4 border-black/5 flex items-center justify-between hover:shadow-md transition cursor-pointer'>
-            <div className='flex items-center gap-x-4'>
-              <div className={cn("p-2 w-fit rounded-md", tool.bgColor)}>
-                <tool.icon className={cn('w-8 h-8', tool.color)}/>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Notes</CardTitle>
+            <BookText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">12</div>
+            <p className="text-xs text-muted-foreground">+2 from last week</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Quizzes Created</CardTitle>
+            <Brain className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">24</div>
+            <p className="text-xs text-muted-foreground">+4 from last week</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Flashcards</CardTitle>
+            <Cards className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">36</div>
+            <p className="text-xs text-muted-foreground">+8 from last week</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Study Time</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">2.5h</div>
+            <p className="text-xs text-muted-foreground">+0.5h from yesterday</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-4">
+          <CardHeader>
+            <CardTitle>Recent Notes</CardTitle>
+            <CardDescription>Your recently created notes</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {/* If no notes */}
+            <div className="flex h-[200px] items-center justify-center rounded-md border border-dashed">
+              <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
+                <GraduationCap className="h-10 w-10 text-muted-foreground" />
+                <h3 className="mt-4 text-lg font-semibold">No notes created</h3>
+                <p className="mb-4 mt-2 text-sm text-muted-foreground">
+                  You haven't created any notes yet. Start by creating your first note.
+                </p>
+                <Button asChild>
+                  <Link href="/lecture-to-notes">Create your first note</Link>
+                </Button>
+              </div>
             </div>
-            <div className='font-semibold'>
-              {tool.label}
-            </div>
-            </div>
-            <ArrowRight className='w-5 h-5'/>
-          </Card>
-        ))}
+
+            {/* When there are notes */}
+            {/* <div className="space-y-4">
+              {recentNotes.map((note) => (
+                <div key={note.id} className="flex items-center">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium leading-none">{note.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Created {format(new Date(note.createdAt), 'MMM dd, yyyy')}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div> */}
+          </CardContent>
+        </Card>
+        
+        <Card className="col-span-3">
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Common tasks and actions</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-2">
+            <Button asChild variant="outline" className="justify-start">
+              <Link href="/lecture-to-notes">
+                <BookText className="mr-2 h-4 w-4" />
+                Create New Note
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="justify-start">
+              <Link href="/notes-to-quiz">
+                <Brain className="mr-2 h-4 w-4" />
+                Generate Quiz
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="justify-start">
+              <Link href="/notes-to-flashcards">
+                <Cards className="mr-2 h-4 w-4" />
+                Create Flashcards
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

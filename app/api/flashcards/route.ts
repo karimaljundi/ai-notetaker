@@ -1,5 +1,5 @@
 'use server';
-import { deleteFlashcardById, getFlashcardsByNoteId, updateFlashcardById } from "@/lib/handleNote";
+import { addFlashcard, deleteFlashcardById, getFlashcardsByNoteId, updateFlashcardById } from "@/lib/handleNote";
 import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -33,5 +33,15 @@ export async function PUT(req: NextRequest){
         
     } catch (error) {
         console.log("Error updating flashcard:", error);
+    }
+}
+export async function POST(req: NextRequest){
+    try {
+        const flashcard = await req.json();
+        console.log("Creating flashcard in route:", flashcard);
+        const createFlashcard = addFlashcard(flashcard.id, flashcard.flashcards);
+        return new Response(JSON.stringify(createFlashcard), {status: 200});
+    } catch (error) {
+        console.log("Error creating flashcard:", error);
     }
 }

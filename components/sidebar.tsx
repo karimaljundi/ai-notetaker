@@ -1,96 +1,144 @@
 "use client";
 import { cn } from '@/lib/utils';
-import { BookAIcon, BookCheck, Brain, LayoutDashboard, MicrochipIcon, Settings, StickyNote } from 'lucide-react';
+import { 
+  BookText, 
+  GraduationCap, 
+  Brain, 
+  Layout, 
+  Settings2, 
+  WalletCards as Cards,
+  LogOut
+} from 'lucide-react';
 import { Montserrat } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect, usePathname } from 'next/navigation';
-import React from 'react';
 import { useSession } from 'next-auth/react';
 import { doLogout } from '@/app/actions';
+import { Button } from './ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { ModeToggle } from './ModeToggle';
 
-const montserrat = Montserrat({
-  weight: "600",
-  subsets: ["latin"]
-});
+const montserrat = Montserrat({ weight: "600", subsets: ["latin"] });
 
 const routes = [
   {
     label: "Dashboard",
-    icon: LayoutDashboard,
+    icon: Layout,
     href: "/dashboard",
-    color: "text-sky-500"
+    color: "text-violet-500",
+    bgColor: "bg-violet-500/10"
   },
   {
     label: "Lecture to Notes",
-    icon: MicrochipIcon,
+    icon: GraduationCap,
     href: "/lecture-to-notes",
-    color: "text-rose-500"
+    color: "text-pink-500",
+    bgColor: "bg-pink-500/10"
   },
   {
-    label: "Notes to quiz",
-    icon: BookCheck,
+    label: "Notes to Quiz",
+    icon: BookText,
     href: "/notes-to-quiz",
-    color: "text-green-500"
+    color: "text-emerald-500",
+    bgColor: "bg-emerald-500/10"
   },
   {
-    label: "Notes to Flashcards",
-    icon: StickyNote,
+    label: "Flashcards",
+    icon: Cards,
     href: "/notes-to-flashcards",
-    color: "text-yellow-500"
+    color: "text-amber-500",
+    bgColor: "bg-amber-500/10"
   },
   {
-    label: "Ask a Question",
+    label: "AI Assistant",
     icon: Brain,
     href: "/ask-a-question",
-    color: "text-indigo-500"
+    color: "text-blue-500",
+    bgColor: "bg-blue-500/10"
   },
   {
     label: "Settings",
-    icon: Settings,
-    href: "/settings"
+    icon: Settings2,
+    href: "/settings",
+    color: "text-gray-500",
+    bgColor: "bg-gray-500/10"
   }
 ];
 
 const Sidebar = () => {
   const pathname = usePathname();
   const { data: session } = useSession();
-
+  console.log("Session:", session);
+  console.log("Pathname:", pathname);
+  if (!session && pathname !== "/sign-in") {
+    redirect("/sign-in");
+  }
   return (
-    <div className="space-y-4 py-4 flex flex-col h-full bg-[#111827] text-white">
-      <div className='px-3 py-2 flex-1'>
-        <Link href={'/dashboard'} className='flex items-center pl-3 mb-14'>
-          <Image src="/logo.png" alt="Logo" width={40} height={40} />
-          <span className={cn("ml-3 text-2xl font-bold", montserrat.className)}>Notetaker</span>
+    <div className="relative flex flex-col h-full bg-background border-r space-y-4">
+      <div className="px-3 py-2 flex-1">
+        <Link href="/dashboard" className="flex items-center px-3 py-4 mb-8">
+          <div className="relative w-8 h-8 mr-4">
+            <Image 
+              fill
+              src="/logo.png" 
+              alt="Logo" 
+              className="rounded-lg"
+            />
+          </div>
+          <h1 className={cn("text-xl font-bold", montserrat.className)}>
+            Notetaker
+          </h1>
         </Link>
         <div className="space-y-1">
           {routes.map((route) => (
-            <Link key={route.href} href={route.href} className={cn("flex items-center px-3 py-2 text-sm font-medium rounded-md", {
-              "bg-gray-900 text-white": pathname === route.href,
-              "text-gray-400 hover:bg-gray-700 hover:text-white": pathname !== route.href,
-            })}>
-              <route.icon className={cn("mr-3 h-6 w-6", route.color)} />
+            <Link
+              key={route.href}
+              href={route.href}
+              className={cn(
+                "flex items-center gap-x-2 text-sm font-medium px-3 py-2.5 rounded-lg transition-all duration-200 group",
+                pathname === route.href ? route.bgColor : "hover:bg-accent"
+              )}
+            >
+              <route.icon className={cn("h-5 w-5 transition-colors", route.color)} />
               <span>{route.label}</span>
+              {pathname === route.href && (
+                <div className="absolute left-0 w-1 h-6 rounded-r-full bg-gradient-to-b from-primary/50 to-primary" />
+              )}
             </Link>
           ))}
         </div>
       </div>
-      <div className="px-3 py-2">
-        {session ? (
-          <div className="flex items-center space-x-4">
-        {session.user?.image && (
-          <Image src={session.user.image} alt="User Avatar" width={32} height={32} className="rounded-full" />
-        )}
-        <span>Welcome, {session.user?.name}</span>
-        <form action={doLogout}>
-          <button className="text-sm text-gray-400 hover:text-white">Sign Out</button>
-        </form>
-          </div>
-        ) : (
-          <form action={redirect('/sign-in')}>
-        <button type="submit" name="action" value="google" className="text-sm text-gray-400 hover:text-white">Sign In</button>
-          </form>
-        )}
+      
+      <div className="mt-auto border-t">
+        <div className="p-4 flex items-center gap-4">
+          {session?.user ? (
+            <>
+              <Avatar>
+                <AvatarImage src={session.user.image || ''} />
+                <AvatarFallback>
+                  {session.user.name?.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium">{session.user.name}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {session.user.email}
+                </p>
+              </div>
+              <form action={doLogout}>
+                <Button variant="ghost" size="icon">
+                  <LogOut className="h-5 w-5" />
+                </Button>
+              </form>
+              <ModeToggle />
+            </>
+          ) : (
+            <Button asChild variant="ghost" className="w-full">
+              <Link href="/sign-in">Sign In</Link>
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

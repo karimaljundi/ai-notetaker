@@ -89,6 +89,22 @@ export async function addFlashcards(noteId: string, flashcards: any) {
         throw error;
     }
 }
+export async function addFlashcard(noteId: string, flashcard: any) {
+    try {
+        console.log("Creating flashcard:", flashcard);
+        const newFlashcard = await prisma.flashcard.create({
+            data: {
+                ...flashcard,
+                noteId
+            }
+        });
+        console.log("Flashcard created successfully:", newFlashcard);
+        return JSON.stringify(newFlashcard);
+    } catch (error) {
+        console.error("Error creating flashcard:", error);
+        throw error;
+    }
+}
 export async function getFlashcardsByNoteId(id: string){
     const flashcards = await prisma.flashcard.findMany({
         where: {
@@ -152,5 +168,105 @@ export async function updateFlashcardById(id: string, flashcard: any){
         
     } catch (error) {
         
+    }
+}
+export async function getQuizzesByNoteId(id: string){
+    const quizzes = await prisma.quiz.findMany({
+        where: {
+            noteId: id
+        }
+    });
+    return JSON.stringify(quizzes);
+}
+
+export async function addQuizzes(noteId: string, quizzes: any) {
+    console.log("noteId", noteId);
+    console.log("flashcards type", typeof quizzes);
+
+    let quizzesArray;
+    if (typeof quizzes === 'string') {
+        try {
+            quizzesArray = JSON.parse(quizzes);
+            console.log('quizzes type after parsing:', typeof quizzesArray);
+        } catch (error) {
+            console.error("Error parsing quizzes:", error);
+            throw new Error("Invalid quiz format");
+        }
+    } else {
+        quizzesArray = quizzes;
+    }
+
+    try {
+        const manyFlashcards = await prisma.quiz.createMany({
+            data: quizzesArray['questions'].map((quiz: any) => ({
+                question: quiz.question,
+                correctAnswer: quiz.correct_answer,
+                answers : quiz.options,
+                noteId: noteId
+            }))
+        });
+        console.log("Flashcards created successfully:", manyFlashcards);
+        const note = await prisma.note.findUnique({
+            where: {
+                id: noteId
+            },
+            include: {
+                flashcards: true
+            }
+        });
+        console.log("Updated note with flashcards:", note);
+        return JSON.stringify(note);
+    } catch (error) {
+        console.error("Error adding flashcards:", error);
+        throw error;
+    }
+}
+export async function addQuiz(noteId: string, quiz: any) {
+    try {
+        console.log("Creating quiz:", quiz);
+        const newQuiz = await prisma.quiz.create({
+            data: {
+                ...quiz,
+                noteId
+            }
+        });
+        console.log("Quiz created successfully:", newQuiz);
+        return JSON.stringify(newQuiz);
+    } catch (error) {
+        console.error("Error creating quiz:", error);
+        throw error;
+    }
+}
+export async function updateQuizById(id: string, quiz: any){
+    console.log("Updating quiz:", quiz);
+    try {
+        
+        const updatedQuiz= await prisma.quiz.update({
+            where: {
+                id: id
+            },
+            data: {
+                ...quiz
+            }
+        });
+        console.log("Quiz updated successfully:", updatedQuiz);
+        return JSON.stringify(updatedQuiz);
+        
+    } catch (error) {
+        
+    }
+}
+export async function deleteQuizById(id: string){
+    try {
+        const quiz = await prisma.quiz.delete({
+            where: {
+                id: id
+            }
+        });
+        console.log("Quiz deleted successfully:", quiz);
+        return JSON.stringify(quiz);
+    } catch (error) {
+        console.error("Error deleting flashcard:", error);
+        throw error;
     }
 }

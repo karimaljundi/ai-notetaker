@@ -85,3 +85,11 @@ body {
 .rotate-y-180 {
   transform: rotateY(180deg);
 }
+.prose {
+  max-width: none;
+}
+
+.prose pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}

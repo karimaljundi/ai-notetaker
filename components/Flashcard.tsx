@@ -1,48 +1,56 @@
-import React, { useState } from 'react';
-import { Card, CardBody } from "@nextui-org/card";
-import {Badge} from '@nextui-org/badge'
+import React from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-const Flashcard = ({ front, back, difficulty }) => {
-    const [isFlipped, setIsFlipped] = useState(false);
-  
-    const getDifficultyColor = (difficulty) => {
-        switch (difficulty.toLowerCase()) {
-            case 'easy': return 'success';
-            case 'medium': return 'warning';
-            case 'hard': return 'danger';
-            default: return 'default';
-        }
-    };
+interface FlashcardProps {
+  front: string;
+  back: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  isFlipped: boolean;
+  onFlip: () => void;
+}
 
-    const getDifficultyTextColor = (difficulty) => {
-        switch (difficulty.toLowerCase()) {
-            case 'easy': return 'text-green-500';
-            case 'medium': return 'text-yellow-500';
-            case 'hard': return 'text-red-500';
-            default: return 'text-gray-500';
-        }
-    };
-  
-    return (
-      <Card 
-        isPressable
-        onPress={() => setIsFlipped(!isFlipped)}
-        className="w-64 h-40 relative"
-      >
-        <Badge
-                color={getDifficultyColor(difficulty)}
-                placement="top-right"
-                className="absolute top-2 right-2 z-10"
-            >
-                {difficulty}
-            </Badge>
-            <CardBody className="flex items-center justify-center">
-                <span className={`text-xl font-bold ${getDifficultyTextColor(difficulty)}`}>
-                    {isFlipped ? back : front}
-                </span>
-            </CardBody>
-      </Card>
-    );
+const Flashcard: React.FC<FlashcardProps> = ({ 
+  front, 
+  back, 
+  difficulty,
+  isFlipped,
+  onFlip
+}) => {
+  const getDifficultyColor = (difficulty: string) => {
+    console.log("Difficulty:", difficulty);
+    switch (difficulty.toLowerCase()) {
+      case 'easy': return 'bg-green-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'hard': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
   };
-  
-  export default Flashcard;
+
+  return (
+    <Card className="w-full max-w-2xl relative" onClick={onFlip}>
+      <Badge 
+        className={`absolute top-2 right-2 ${getDifficultyColor(difficulty)}`}
+      >
+        {difficulty}
+      </Badge>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl font-bold leading-tight break-words">
+          {isFlipped ? back : front}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Button
+          onClick={onFlip}
+          variant="outline"
+          className="w-full mt-4"
+        >
+          {isFlipped ? "Show Question" : "Show Answer"}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default Flashcard;

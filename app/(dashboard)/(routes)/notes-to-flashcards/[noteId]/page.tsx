@@ -8,6 +8,14 @@ import { z } from 'zod';
 import { formSchema } from '../../lecture-to-notes/constants';
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ChevronLeft, ChevronRight, Plus, Edit2, Trash2, Save, Wand2 } from "lucide-react";
+import { Separator } from '@/components/ui/separator';
+
 
 function FlashcardsPage({params}: {params: Promise<{ noteId: string }>}) {
     const { noteId } = use(params);
@@ -17,9 +25,12 @@ function FlashcardsPage({params}: {params: Promise<{ noteId: string }>}) {
     const [editMode, setEditMode] = useState(false);
     const [newFlashcard, setNewFlashcard] = useState({ question: '', answer: '', difficulty: 'easy' });
     const [notes, setNotes] = useState();
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
-        fetchFlashcards(); fetchNotes();
+        fetchFlashcards(); 
     }, [noteId]);
+    const currentFlashcard = flashcards[currentIndex];
+
 const form = useForm<z.infer<typeof formSchema>>({
             resolver:zodResolver(formSchema),
             defaultValues: {
@@ -33,6 +44,7 @@ const form = useForm<z.infer<typeof formSchema>>({
             });
             console.log("response", getFlashcards.data);
             setFlashcards(getFlashcards.data);
+            setLoading(false);
             
         } catch (error) {
             console.error("Error fetching flashcards:", error);
@@ -133,10 +145,11 @@ const handleGenerate = async (values: z.infer<typeof formSchema>) => {
         try {
           console.log("Flashcards:", newFlashcard);
           console.log("Flashcards typeof:", typeof newFlashcard);
-          const noteResponse = await fetch('/api/create-flashcards', {
+          setLoading(true);
+          const noteResponse = await fetch('/api/flashcards', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: noteId, flashcards: [newFlashcard] }),
+            body: JSON.stringify({ id: noteId, flashcards: newFlashcard }),
         });
         const noteResponseData = await noteResponse.json();
             setFlashcards([...flashcards, noteResponseData]);
@@ -147,134 +160,303 @@ const handleGenerate = async (values: z.infer<typeof formSchema>) => {
             console.error("Error creating flashcard:", error);
         }
     };
-
-    if (flashcards.length === 0) {
-        return (<div>
-          <div className="mb-4">
-                <h3 className="text-2xl font-bold mb-2">Create New Flashcard</h3>
-                <input
-                    type="text"
-                    value={newFlashcard.question}
-                    onChange={(e) => setNewFlashcard({ ...newFlashcard, question: e.target.value })}
-                    className="border p-2 mb-2 w-full"
-                    placeholder="New question"
-                />
-                <input
-                    type="text"
-                    value={newFlashcard.answer}
-                    onChange={(e) => setNewFlashcard({ ...newFlashcard, answer: e.target.value })}
-                    className="border p-2 mb-2 w-full"
-                    placeholder="New answer"
-                />
-                <select
-                    value={newFlashcard.difficulty}
-                    onChange={(e) => setNewFlashcard({ ...newFlashcard, difficulty: e.target.value })}
-                    className="border p-2 mb-2 w-full"
-                >
-                    <option value="easy">Easy</option>
-                    <option value="medium">Medium</option>
-                    <option value="hard">Hard</option>
-                </select>
-                <button onClick={handleCreate} className="bg-green-500 text-white py-2 px-4 rounded">Create</button>
+    if (loading) {
+        return (
+            <div className="container mx-auto p-6 max-w-5xl">
+                <Card className="w-full">
+                    <CardHeader>
+                        <CardTitle className="text-3xl font-bold">Flashcards</CardTitle>
+                        <CardDescription>Loading your study materials...</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                        <p className="text-muted-foreground">Preparing your flashcards</p>
+                    </CardContent>
+                </Card>
             </div>
-
-
-<form onSubmit={form.handleSubmit(handleGenerate)} className="mb-4">
-                <input
-                    type="text"
-                    {...form.register("prompt")}
-                    placeholder="Enter prompt for flashcards"
-                    className="border p-2 mb-2 w-full"
-                />
-                <button
-                    type="submit"
-                    className="bg-blue-500 text-white p-2 rounded"
-                    
-                >Generate Flashcards
-                </button>
-            </form>
-        </div> );
+        );
     }
 
-    const currentFlashcard = flashcards[currentIndex];
+    if (!flashcards || flashcards.length === 0) {
+        return (
+            <div className="container mx-auto p-6 max-w-5xl">
+                <Card className="w-full mb-6">
+                    <CardHeader>
+                        <CardTitle className="text-3xl font-bold">Create Your First Flashcard</CardTitle>
+                        <CardDescription>Get started with your study materials</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Tabs defaultValue="create">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="create">Create Manually</TabsTrigger>
+                                <TabsTrigger value="generate">Generate with AI</TabsTrigger>
+                            </TabsList>
+                            
+                            <TabsContent value="create" className="space-y-4">
+                                <Input
+                                    placeholder="Question"
+                                    value={newFlashcard.question}
+                                    onChange={(e) => setNewFlashcard({ ...newFlashcard, question: e.target.value })}
+                                />
+                                <Input
+                                    placeholder="Answer"
+                                    value={newFlashcard.answer}
+                                    onChange={(e) => setNewFlashcard({ ...newFlashcard, answer: e.target.value })}
+                                />
+                                <Select
+                                    value={newFlashcard.difficulty}
+                                    onValueChange={(value) => setNewFlashcard({ ...newFlashcard, difficulty: value })}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select difficulty" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="easy">Easy</SelectItem>
+                                        <SelectItem value="medium">Medium</SelectItem>
+                                        <SelectItem value="hard">Hard</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <Button onClick={handleCreate} className="w-full">
+                                    <Plus className="mr-2 h-4 w-4" /> Create Flashcard
+                                </Button>
+                            </TabsContent>
+    
+                            <TabsContent value="generate" className="space-y-4">
+                                <form onSubmit={form.handleSubmit(handleGenerate)}>
+                                    <Input
+                                        {...form.register("prompt")}
+                                        placeholder="Enter prompt to generate flashcards..."
+                                    />
+                                    <Button type="submit" className="w-full mt-4">
+                                        <Wand2 className="mr-2 h-4 w-4" /> Generate Flashcards
+                                    </Button>
+                                </form>
+                            </TabsContent>
+                        </Tabs>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+    
+    
+
+    console.log("currentFlashcard", currentFlashcard);
     
     return (
-        <div className="p-4">
-            <h2 className="text-3xl font-bold mb-4">Flashcards for Note {noteId}</h2>
-            <div className="flex justify-center items-center mb-4">
-                <button onClick={handlePrev} className="bg-gray-500 text-white py-2 px-4 rounded mr-2">Previous</button>
-                <Flashcard
-                    front={currentFlashcard.question}
-                    back={currentFlashcard.answer}
-                    difficulty={currentFlashcard.difficulty}
-                />
-                <button onClick={handleNext} className="bg-gray-500 text-white py-2 px-4 rounded ml-2">Next</button>
-            </div>
-            {editMode ? (
-                <div className="mb-4">
-                    <input
-                        type="text"
-                        value={currentFlashcard.question}
-                        onChange={(e) => setFlashcards(flashcards.map((fc, i) => i === currentIndex ? { ...fc, question: e.target.value } : fc))}
-                        className="border p-2 mb-2 w-full"
-                        placeholder="Edit question"
-                    />
-                    <input
-                        type="text"
-                        value={currentFlashcard.answer}
-                        onChange={(e) => setFlashcards(flashcards.map((fc, i) => i === currentIndex ? { ...fc, answer: e.target.value } : fc))}
-                        className="border p-2 mb-2 w-full"
-                        placeholder="Edit answer"
-                    />
-                    <button onClick={handleSave} className="bg-blue-500 text-white py-2 px-4 rounded">Save</button>
-                </div>
-            ) : (
-                <button onClick={() => handleEdit(currentIndex)} className="bg-yellow-500 text-white py-2 px-4 rounded mb-4">Edit</button>
-            )}
-            <button onClick={() => handleDelete(currentIndex)} className="bg-red-500 text-white py-2 px-4 rounded mb-4">Delete</button>
-            <div className="mb-4">
-                <h3 className="text-2xl font-bold mb-2">Create New Flashcard</h3>
-                <input
-                    type="text"
-                    value={newFlashcard.question}
-                    onChange={(e) => setNewFlashcard({ ...newFlashcard, question: e.target.value })}
-                    className="border p-2 mb-2 w-full"
-                    placeholder="New question"
-                />
-                <input
-                    type="text"
-                    value={newFlashcard.answer}
-                    onChange={(e) => setNewFlashcard({ ...newFlashcard, answer: e.target.value })}
-                    className="border p-2 mb-2 w-full"
-                    placeholder="New answer"
-                />
-                <select
-                    value={newFlashcard.difficulty}
-                    onChange={(e) => setNewFlashcard({ ...newFlashcard, difficulty: e.target.value })}
-                    className="border p-2 mb-2 w-full"
-                >
-                    <option value="easy">Easy</option>
-                    <option value="medium">Medium</option>
-                    <option value="hard">Hard</option>
-                </select>
-                <button onClick={handleCreate} className="bg-green-500 text-white py-2 px-4 rounded">Create</button>
-            </div>
-            <form onSubmit={form.handleSubmit(handleGenerate)} className="mb-4">
-                <input
-                    type="text"
-                    {...form.register("prompt")}
-                    placeholder="Enter prompt for flashcards"
-                    className="border p-2 mb-2 w-full"
-                />
-                <button
-                    type="submit"
-                    className="bg-blue-500 text-white p-2 rounded"
-                    
-                >Generate Flashcards
-                </button>
-            </form>
-        </div>
+        <div className="container mx-auto p-6 max-w-5xl">
+            <Card className="mb-8">
+                <CardHeader>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <CardTitle className="text-3xl font-bold">Flashcard Management</CardTitle>
+                            <CardDescription>Note ID: {noteId}</CardDescription>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-sm text-muted-foreground">
+                                Card {currentIndex + 1} of {flashcards.length}
+                            </div>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-center gap-4 mb-8">
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            onClick={handlePrev}
+                        >
+                            <ChevronLeft className="mr-2" /> Previous
+                        </Button>
+    
+                        <div className="flex-1">
+                            <Flashcard
+                                front={currentFlashcard.question}
+                                back={currentFlashcard.answer}
+                                difficulty={currentFlashcard.difficulty}
+                                isFlipped={isFlipped}
+                                onFlip={handleFlip}
+                            />
+                        </div>
+    
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            onClick={handleNext}
+                        >
+                            Next <ChevronRight className="ml-2" />
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+            <Tabs defaultValue="edit" className="mb-8">
+            <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="edit">Edit Current</TabsTrigger>
+                <TabsTrigger value="create">Create New</TabsTrigger>
+                <TabsTrigger value="generate">Generate</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="edit">
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="space-y-4">
+                            <Input
+                                value={currentFlashcard.question}
+                                onChange={(e) => setFlashcards(flashcards.map((fc, i) => 
+                                    i === currentIndex ? { ...fc, question: e.target.value } : fc
+                                ))}
+                                placeholder="Question"
+                            />
+                            <Input
+                                value={currentFlashcard.answer}
+                                onChange={(e) => setFlashcards(flashcards.map((fc, i) => 
+                                    i === currentIndex ? { ...fc, answer: e.target.value } : fc
+                                ))}
+                                placeholder="Answer"
+                            />
+                            <Select
+                                value={currentFlashcard.difficulty}
+                                onValueChange={(value) => setFlashcards(flashcards.map((fc, i) => 
+                                    i === currentIndex ? { ...fc, difficulty: value } : fc
+                                ))}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select difficulty" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="easy">Easy</SelectItem>
+                                    <SelectItem value="medium">Medium</SelectItem>
+                                    <SelectItem value="hard">Hard</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <div className="flex gap-2">
+                                <Button onClick={handleSave} className="flex-1">
+                                    <Save className="mr-2 h-4 w-4" /> Save Changes
+                                </Button>
+                                <Button onClick={() => handleDelete(currentIndex)} variant="destructive" className="flex-1">
+                                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                </Button>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </TabsContent>
+
+            <TabsContent value="create">
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="space-y-4">
+                            <Input
+                                placeholder="Question"
+                                value={newFlashcard.question}
+                                onChange={(e) => setNewFlashcard({ ...newFlashcard, question: e.target.value })}
+                            />
+                            <Input
+                                placeholder="Answer"
+                                value={newFlashcard.answer}
+                                onChange={(e) => setNewFlashcard({ ...newFlashcard, answer: e.target.value })}
+                            />
+                            <Select
+                                value={newFlashcard.difficulty}
+                                onValueChange={(value) => setNewFlashcard({ ...newFlashcard, difficulty: value })}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select difficulty" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="easy">Easy</SelectItem>
+                                    <SelectItem value="medium">Medium</SelectItem>
+                                    <SelectItem value="hard">Hard</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Button onClick={handleCreate} className="w-full">
+                                <Plus className="mr-2 h-4 w-4" /> Create Flashcard
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </TabsContent>
+
+            <TabsContent value="generate">
+                <Card>
+                    <CardContent className="pt-6">
+                        <form onSubmit={form.handleSubmit(handleGenerate)} className="space-y-4">
+                            <Input
+                                {...form.register("prompt")}
+                                placeholder="Enter prompt to generate flashcards..."
+                            />
+                            <Button type="submit" className="w-full">
+                                <Wand2 className="mr-2 h-4 w-4" /> Generate Flashcards
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
+            </TabsContent>
+        </Tabs>
+    </div>
     );
+            {/* <Tabs defaultValue="edit" className="mb-8">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="edit">Edit Current Flashcard</TabsTrigger>
+                    <TabsTrigger value="create">Create New Flashcard</TabsTrigger>
+                </TabsList>
+    
+                <TabsContent value="edit">
+                    <Card>
+                        <CardContent className="pt-6">
+                            {editMode ? (
+                                <div className="space-y-4">
+                                    <Input
+                                        value={currentFlashcard.question}
+                                        onChange={(e) => setFlashcards(flashcards.map((fc, i) => 
+                                            i === currentIndex ? { ...fc, question: e.target.value } : fc
+                                        ))}
+                                        placeholder="Edit question"
+                                    />
+                                    <Input
+                                        value={currentFlashcard.answer}
+                                        onChange={(e) => setFlashcards(flashcards.map((fc, i) => 
+                                            i === currentIndex ? { ...fc, answer: e.target.value } : fc
+                                        ))}
+                                        placeholder="Edit answer"
+                                    />
+                                    <Select
+                                        value={currentFlashcard.difficulty}
+                                        onValueChange={(value) => setFlashcards(flashcards.map((fc, i) => 
+                                            i === currentIndex ? { ...fc, difficulty: value } : fc
+                                        ))}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select difficulty" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="easy">Easy</SelectItem>
+                                            <SelectItem value="medium">Medium</SelectItem>
+                                            <SelectItem value="hard">Hard</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <Button onClick={handleSave} className="w-full">
+                                        <Save className="mr-2 h-4 w-4" /> Save Changes
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="flex gap-2">
+                                    <Button onClick={() => handleEdit(currentIndex)} variant="outline" className="w-full">
+                                        <Edit2 className="mr-2 h-4 w-4" /> Edit Flashcard
+                                    </Button>
+                                    <Button onClick={() => handleDelete(currentIndex)} variant="destructive" className="w-full">
+                                        <Trash2 className="mr-2 h-4 w-4" /> Delete Flashcard
+                                    </Button>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+    
+                {/* Continue with Create tab and Generate section similar to quiz page */}
+        //     </Tabs> */}
+        // </div>
+    // );
 }
 
 export default FlashcardsPage;
