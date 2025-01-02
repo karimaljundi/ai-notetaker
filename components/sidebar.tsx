@@ -113,7 +113,7 @@ const Sidebar = ({apiLimitCount=0}: SidebarProps) => {
           ))}
         </div>
       </div>
-      
+      <FreeCounter apiLimitCount={apiLimitCount} />
       <div className="mt-auto border-t">
         <div className="p-4 flex items-center gap-4">
           {session?.user ? (
@@ -144,7 +144,7 @@ const Sidebar = ({apiLimitCount=0}: SidebarProps) => {
           )}
         </div>
       </div>
-      <FreeCounter apiLimitCount={apiLimitCount} />
+      
     </div>
   );
 };

@@ -102,20 +102,11 @@ const handleYouTubeSubmit = async (values: z.infer<typeof formSchema>) => {
     } catch (error) {
         console.error("Error:", error);
         alert("An error occurred while processing the YouTube link.");
+    }finally{
+        router.refresh();
     }
 };
-// const handleVideoUpload = async (file: File) => {
-//     const formData = new FormData();
-//     formData.append('video', file);
-
-//     const response = await axios.post("/api/audio-to-text",formData, {
-//     })
-//     const result = await response.data;
-//     console.log(result);
-
-//  }
-
-  return (
+return (
     <div>
         <Heading
         title='Lecture to Notes'

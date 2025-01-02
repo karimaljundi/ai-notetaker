@@ -1,8 +1,9 @@
 import OpenAI from "openai";
 import { streamObject, streamText } from 'ai'
 import { NextResponse } from "next/server";
-import { getNoteById } from "@/lib/handleNote";
+import { checkApiLimit, getNoteById, increaseLimit } from "@/lib/handleNote";
 import { openai } from '@ai-sdk/openai';
+import { auth } from "@/auth";
 
 
 // const openai = new OpenAI({
@@ -14,6 +15,12 @@ export async function POST(req: Request){
     const note = await getNoteById(noteId);
     const noteContent = JSON.parse(note).content;
     // console.log("note:", noteContent);
+    const authen = await auth();
+            const freeTrial = await checkApiLimit(authen?.id as string);
+            if (!freeTrial){
+                console.log("[API LIMIT REACHED]");
+                return new NextResponse("Free trial limit reached", {status: 403});
+            }
     const textStream = streamText({
         model: openai('gpt-4-turbo'),
         prompt: `You are an expert AI tutor specializing in explaining academic concepts from lecture notes. Your role is to help students understand the material through clear, structured explanations.
@@ -40,7 +47,6 @@ Format Responses:
 
 Remember: You are having a conversation with a student trying to understand these specific lecture notes. Keep responses focused, relevant, and engaging.`,
     });
-    console.log("messages:", messages);
-    console.log("noteId:", noteId);
+    await increaseLimit(authen?.id as string);
     return textStream.toDataStreamResponse();
 }

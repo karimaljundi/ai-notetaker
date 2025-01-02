@@ -1,98 +1,11 @@
 import OpenAI from "openai"
 import { NextResponse } from "next/server"
-import { checkApiLimit } from "@/lib/api-limit";
 import { auth } from "@/auth";
-import { createApiLimit, getApiLimit } from "@/lib/handleNote";
+import { checkApiLimit, getApiLimit, increaseLimit } from "@/lib/handleNote";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 })
-// const anthropic = new Anthropic({
-//   apiKey: process.env.CLAUDE_API_KEY, // defaults to process.env["ANTHROPIC_API_KEY"]
-// });
-    //     const msg = await anthropic.messages.create({
-//       model: "claude-3-5-sonnet-20241022",
-//       max_tokens: 1024,
-//       temperature: 0,
-//       tools: [
-//         {
-//           "name": "formatNotes",
-//           "description": "Format the notes into a structured JSON object",
-//           "input_schema": {
-//             "type": "object",
-//             "properties": {
-//               "title": {
-//                 "type": "string",
-//                 "description": "The main topic or title of the lecture/content"
-//               },
-//               "sections": {
-//                 "type": "array",
-//                 "items": {
-//                   "type": "object",
-//                   "properties": {
-//                     "title": {
-//                       "type": "string",
-//                       "description": "The title of the section"
-//                     },
-//                     "content": {
-//                       "type": "array",
-//                       "items": {
-//                         "type": "string",
-//                         "description": "Detailed key points"
-//                       }
-//                     },
-//                     "examples": {
-//                       "type": "array",
-//                       "items": {
-//                         "type": "object",
-//                         "properties": {
-//                           "description": {
-//                             "type": "string",
-//                             "description": "Brief description of the example"
-//                           },
-//                           "details": {
-//                             "type": "array",
-//                             "items": {
-//                               "type": "string",
-//                               "description": "Additional explanation or steps"
-//                             }
-//                           }
-//                         },
-//                         "required": [
-//                           "description",
-//                           "details"
-//                         ]
-//                       }
-//                     },
-//                     "conclusion": {
-//                       "type": "string",
-//                       "description": "Summary of section insights"
-//                     }
-//                   },
-//                   "required": [
-//                     "title",
-//                     "content"
-//                   ]
-//                 }
-//               }
-//             },
-//             "required": [
-//               "title",
-//               "sections"
-//             ]
-//           }
-//         }
-          
-//       ],
-//       messages: [
-//         {
-//             role: "user",
-//             content: basePrompt + transcriptSection + instructionsSection
-                
-//         }
-//     ],
-//   });
-
 
 export async function POST(req: Request) {
 try {
@@ -101,11 +14,18 @@ try {
     
     const {messages, transcript } = body;
     if (!openai.apiKey){
-        return new NextResponse("OpenAI Key not configured", { status: 500 });
+        return new NextResponse("OpenAI Key not configured", { status: 501 });
     }
     if (!messages){
         return new NextResponse("Messages not provided", { status: 400 });
     }
+    const authen = await auth();
+    const checkApiLimitUser = await checkApiLimit(authen?.id)
+    if (!checkApiLimitUser){
+      alert("API Limit exceeded")
+      return new NextResponse("[API LIMIT EXCEEDED]", { status: 429 });
+    }
+    
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -128,6 +48,7 @@ try {
       frequency_penalty: 0,
       presence_penalty: 0
     });
+    await increaseLimit(authen?.id)
       // console.log("OpenAI Response", response.choices[0].message.content);
       // console.log("Response type", typeof response.choices[0].message.content);
     return NextResponse.json(response.choices[0].message.content);

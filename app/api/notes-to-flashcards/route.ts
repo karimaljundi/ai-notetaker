@@ -17,6 +17,7 @@ export async function POST(req: Request) {
         const authen = await auth();
         const freeTrial = await checkApiLimit(authen?.id as string);
         if (!freeTrial){
+            console.log("[API LIMIT REACHED]");
             return new NextResponse("Free trial limit reached", {status: 403});
         }
 //         const placeholderResponse =`{
@@ -121,7 +122,7 @@ End the response with a valid JSON object.`
             presence_penalty: 0
         });
     await increaseLimit(authen?.id as string);
-        return NextResponse.json(response.choices[0].message.content);
+    return NextResponse.json(response.choices[0].message.content);
     } catch (error) {
         console.error("[CONVERSION ERROR]", error);
         return new NextResponse("Internal Server Error", { status: 500 });

@@ -313,7 +313,7 @@ export async function checkApiLimit(userId: string){
         const user = await prisma.user.findUniqueOrThrow({
             where: { id: userId} 
         });
-        return user.apiLimit;
+        return user.apiLimit as number;
     } catch (error) {
         JSON.stringify({error: "User not found"});
     }

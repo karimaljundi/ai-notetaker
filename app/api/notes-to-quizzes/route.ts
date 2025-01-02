@@ -1,5 +1,7 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { checkApiLimit, increaseLimit } from "@/lib/handleNote";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
@@ -17,8 +19,12 @@ export async function POST(req: Request) {
         if (!openai.apiKey) {
             return new NextResponse("OpenAI Key not configured", { status: 500 });
         }
-
-        console.log("before openai call");
+        const authen = await auth();
+        const freeTrial = await checkApiLimit(authen?.id as string);
+        if (!freeTrial){
+            console.log("[API LIMIT REACHED]");
+            return new NextResponse("Free trial limit reached", {status: 403});
+          }
 //         const placeholderResponse =`{
 //    "questions": [
 //      {
@@ -46,6 +52,7 @@ export async function POST(req: Request) {
 
 //         console.log("Using placeholder response:", placeholderResponse);
 //         return NextResponse.json(placeholderResponse);
+
 const response = await openai.chat.completions.create({
     model: "gpt-4-turbo",
     messages: [
@@ -107,10 +114,8 @@ Provide a variety of questions that effectively test understanding across diffic
     frequency_penalty: 0,
     presence_penalty: 0
 });
-
-
-        console.log("OpenAI Response", response.choices[0].message.content);
-        return NextResponse.json(response.choices[0].message.content);
+await increaseLimit(authen?.id as string);
+      return NextResponse.json(response.choices[0].message.content);
     } catch (error) {
         console.error("[CONVERSION ERROR]", error);
         return new NextResponse("Internal Server Error", { status: 500 });
