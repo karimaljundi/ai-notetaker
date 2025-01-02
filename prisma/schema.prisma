@@ -22,6 +22,7 @@ model User {
   Authenticator  Authenticator[]
   Note           Note[]
   sessions       Session[]
+  apiLimit Int @default(0)
 }
 
 model Account {
@@ -77,15 +78,15 @@ model Authenticator {
 }
 
 model Note {
-  id           String         @id @default(cuid())
-  email        String
-  title        String
-  content      String?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  flashcards   Flashcard[]
-  user         User           @relation(fields: [email], references: [email], onDelete: Cascade)
-  quizzes Quiz[]
+  id         String      @id @default(cuid())
+  email      String
+  title      String
+  content    String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  flashcards Flashcard[]
+  user       User        @relation(fields: [email], references: [email], onDelete: Cascade)
+  quizzes    Quiz[]
 
   @@unique([email, title])
 }
@@ -111,10 +112,4 @@ model Quiz {
   noteId        String
   note          Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
 }
-model UserApiLimit {
-  id        String   @id @default(cuid())
-  userId    String
-  limit     Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+

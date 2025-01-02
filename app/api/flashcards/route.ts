@@ -1,7 +1,8 @@
 'use server';
-import { addFlashcard, deleteFlashcardById, getFlashcardsByNoteId, updateFlashcardById } from "@/lib/handleNote";
-import { NextRequest } from "next/server";
-
+import { addFlashcard, checkApiLimit, deleteFlashcardById, getFlashcardsByNoteId, increaseLimit, updateFlashcardById } from "@/lib/handleNote";
+import { NextRequest, NextResponse } from "next/server";
+import {auth} from '@/auth'
+import { useSession } from "next-auth/react";
 export async function GET(req: NextRequest) {
     const id = req.nextUrl.searchParams.get("id") as string;
     try{
@@ -38,8 +39,13 @@ export async function PUT(req: NextRequest){
 export async function POST(req: NextRequest){
     try {
         const flashcard = await req.json();
-        console.log("Creating flashcard in route:", flashcard);
+        const authen = await auth();
+        const freeTrial = await checkApiLimit(authen?.id as string);
+        if (!freeTrial){
+            return new NextResponse("Free trial limit reached", {status: 403});
+        }
         const createFlashcard = addFlashcard(flashcard.id, flashcard.flashcards);
+        await increaseLimit(authen?.id as string);
         return new Response(JSON.stringify(createFlashcard), {status: 200});
     } catch (error) {
         console.log("Error creating flashcard:", error);

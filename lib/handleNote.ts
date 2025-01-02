@@ -1,4 +1,5 @@
 
+import { MAX_FREE_COUNTS } from '@/constants';
 import prisma from './prismadb';
 
 
@@ -268,5 +269,52 @@ export async function deleteQuizById(id: string){
     } catch (error) {
         console.error("Error deleting flashcard:", error);
         throw error;
+    }
+}
+export async function findUser(id: any){
+    const user = await prisma.user.findUnique({
+        where: { id }
+       
+    });
+    return JSON.stringify(user);
+}
+export async function increaseLimit(userId: string){
+    try {
+        const user = await prisma.user.findUniqueOrThrow({
+            where: { id: userId} 
+        });
+        console.log("User found:", user);
+        const updateUser = await prisma.user.update({
+            where: {id: userId},
+            data: {
+                apiLimit: { increment: 1 }
+            }
+        });
+        return updateUser;
+    } catch (error) {
+        JSON.stringify({error: "User not found"});
+    }
+}
+export async function checkApiLimit(userId: string){
+    try {
+        const user = await prisma.user.findUniqueOrThrow({
+            where: { id: userId} 
+        });
+        if (!user || user.apiLimit< MAX_FREE_COUNTS){
+            return true;
+        }else{
+            return false;
+        }
+    } catch (error) {
+        JSON.stringify({error: "User not found"});
+    }
+}export async function getApiLimit(userId: string){
+    try {
+        const user = await prisma.user.findUniqueOrThrow({
+            where: { id: userId} 
+        });
+        return user.apiLimit;
+    } catch (error) {
+        JSON.stringify({error: "User not found"});
     }
 }

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, use } from 'react';
 import axios from 'axios';
 import Flashcard from '@/components/Flashcard';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { set, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { formSchema } from '../../lecture-to-notes/constants';
@@ -15,9 +15,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronLeft, ChevronRight, Plus, Edit2, Trash2, Save, Wand2 } from "lucide-react";
 import { Separator } from '@/components/ui/separator';
+import { useSession } from 'next-auth/react';
 
 
 function FlashcardsPage({params}: {params: Promise<{ noteId: string }>}) {
+    const {data: session, status, update} = useSession();
     const { noteId } = use(params);
     const [flashcards, setFlashcards] = useState<any[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -26,6 +28,7 @@ function FlashcardsPage({params}: {params: Promise<{ noteId: string }>}) {
     const [newFlashcard, setNewFlashcard] = useState({ question: '', answer: '', difficulty: 'easy' });
     const [notes, setNotes] = useState();
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
     useEffect(() => {
         fetchFlashcards(); 
     }, [noteId]);
@@ -45,7 +48,6 @@ const form = useForm<z.infer<typeof formSchema>>({
             console.log("response", getFlashcards.data);
             setFlashcards(getFlashcards.data);
             setLoading(false);
-            
         } catch (error) {
             console.error("Error fetching flashcards:", error);
         }
@@ -155,6 +157,9 @@ const handleGenerate = async (values: z.infer<typeof formSchema>) => {
             setFlashcards([...flashcards, noteResponseData]);
             console.log("Flashcard added to database", noteResponseData);
             setNewFlashcard({ question: '', answer: '', difficulty: 'easy' });
+            await update({});
+            router.refresh()
+            console.log("LIMIT AFTER:", session);
             fetchFlashcards();
         } catch (error) {
             console.error("Error creating flashcard:", error);

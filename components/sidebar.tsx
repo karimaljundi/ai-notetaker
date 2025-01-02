@@ -18,6 +18,7 @@ import { doLogout } from '@/app/actions';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { ModeToggle } from './ModeToggle';
+import { FreeCounter } from './free-counter';
 
 const montserrat = Montserrat({ weight: "600", subsets: ["latin"] });
 
@@ -65,10 +66,13 @@ const routes = [
     bgColor: "bg-gray-500/10"
   }
 ];
-
-const Sidebar = () => {
+interface SidebarProps {
+  apiLimitCount: number;
+}
+const Sidebar = ({apiLimitCount=0}: SidebarProps) => {
   const pathname = usePathname();
   const { data: session } = useSession();
+  
   console.log("Session:", session);
   console.log("Pathname:", pathname);
   if (!session && pathname !== "/sign-in") {
@@ -114,12 +118,12 @@ const Sidebar = () => {
         <div className="p-4 flex items-center gap-4">
           {session?.user ? (
             <>
-              <Avatar>
-                <AvatarImage src={session.user.image || ''} />
+              {/* <Avatar>
+                <AvatarImage src={session.user || ''} />
                 <AvatarFallback>
                   {session.user.name?.charAt(0).toUpperCase()}
                 </AvatarFallback>
-              </Avatar>
+              </Avatar> */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium">{session.user.name}</p>
                 <p className="text-xs text-muted-foreground truncate">
@@ -140,6 +144,7 @@ const Sidebar = () => {
           )}
         </div>
       </div>
+      <FreeCounter apiLimitCount={apiLimitCount} />
     </div>
   );
 };

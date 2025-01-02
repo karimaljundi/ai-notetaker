@@ -28,7 +28,8 @@ export default function AIChatPage() {
       noteId: selectedNote
     }
   })
-
+console.log("user", typeof session?.user?.email)
+console.log("id", session?.user?.email)
   useEffect(() => {
     const fetchNotes = async () => {
       try {
@@ -42,82 +43,7 @@ export default function AIChatPage() {
     fetchNotes()
   }, [])
 
-  // return (
-  //   <div className="flex-1 space-y-4 p-8 pt-6">
-  //     <div className="flex items-center justify-between space-y-2">
-  //       <h2 className="text-3xl font-bold tracking-tight">AI Assistant</h2>
-  //     </div>
-  //     <div className="grid gap-4">
-  //       <Card className="col-span-3">
-  //         <CardHeader>
-  //           <CardTitle>Chat with AI about your notes</CardTitle>
-  //           <CardDescription>
-  //             Select a note and start asking questions
-  //           </CardDescription>
-  //         </CardHeader>
-  //         <CardContent className="space-y-4">
-  //           <Select
-  //             value={selectedNote}
-  //             onValueChange={setSelectedNote}
-  //           >
-  //             <SelectTrigger>
-  //               <SelectValue placeholder="Select a note" />
-  //             </SelectTrigger>
-  //             <SelectContent>
-  //               {notes.map((note) => (
-  //                 <SelectItem key={note.id} value={note.id}>
-  //                   {note.title}
-  //                 </SelectItem>
-  //               ))}
-  //             </SelectContent>
-  //           </Select>
-
-  //           <Card className="border-2">
-  //             <ScrollArea className="h-[500px] p-4">
-  //               <div className="space-y-4">
-  //                 {messages.map((message, index) => (
-  //                   <div
-  //                     key={index}
-  //                     className={cn(
-  //                       "flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-3 py-2 text-sm",
-  //                       message.role === "user"
-  //                         ? "ml-auto bg-primary text-primary-foreground"
-  //                         : "bg-muted"
-  //                     )}
-  //                   >
-  //                     {message.content}
-  //                   </div>
-  //                 ))}
-  //               </div>
-  //             </ScrollArea>
-  //           </Card>
-
-  //           <form 
-  //             onSubmit={handleSubmit}
-  //             className="flex items-center gap-x-2"
-  //           >
-  //             <Input
-  //               disabled={!selectedNote}
-  //               placeholder={selectedNote ? "Ask a question..." : "Select a note first"}
-  //               value={input}
-  //               onChange={handleInputChange}
-  //             />
-  //             <Button 
-  //               type="submit" 
-  //               disabled={!selectedNote || !input || loading}
-  //             >
-  //               {loading ? (
-  //                 <Brain className="h-4 w-4 animate-spin" />
-  //               ) : (
-  //                 <Send className="h-4 w-4" />
-  //               )}
-  //             </Button>
-  //           </form>
-  //         </CardContent>
-  //       </Card>
-  //     </div>
-  //   </div>
-  // )
+  
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
