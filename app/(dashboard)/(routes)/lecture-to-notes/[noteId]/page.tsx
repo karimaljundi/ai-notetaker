@@ -29,7 +29,6 @@ function page({params}: {params: Promise<{ noteId: string }>}) {
                 params: { id: noteId }
             });
             console.log("response", (response.data.content));
-            // console.log("response as an object", JSON.parse(response.data.content));
             setNotes(JSON.parse(response.data.content));
             
         }catch (error) {

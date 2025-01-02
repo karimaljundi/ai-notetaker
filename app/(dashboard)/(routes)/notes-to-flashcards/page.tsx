@@ -18,7 +18,6 @@ const fetchNotes = async () => {
             params: { email: session?.user?.email }
         });
         if (Array.isArray(response.data)) {
-            // console.log("You are an array")
             setNotes(response.data); // Ensure response data is an array
         } else {
             console.error("Error: Notes data is not an array");

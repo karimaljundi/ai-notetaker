@@ -43,7 +43,6 @@ const isLoadig = form.formState.isSubmitting;
                 params: { email: session?.user?.email }
             });
             if (Array.isArray(response.data)) {
-                // console.log("You are an array")
                 setNotes(response.data); // Ensure response data is an array
             } else {
                 console.error("Error: Notes data is not an array");
@@ -61,7 +60,6 @@ const handleYouTubeSubmit = async (values: z.infer<typeof formSchema>) => {
         });
 
         if (response) {
-            // console.log("Transcript:", response.data);
             try {
                 const userMessage: ChatCompletionMessageParam = {
                     role: "user",
@@ -69,9 +67,11 @@ const handleYouTubeSubmit = async (values: z.infer<typeof formSchema>) => {
                 };
                 const newMessages = [...messages,userMessage];
                 const startTime = performance.now();
+                console.log("Transcript response", response);
                 const openaiResponse = await axios.post("/api/lecture-to-notes", {
-                    messages: newMessages, transcript: response.data
+                    messages: newMessages, transcript: response.data.transcript, 
                 });
+                console.log("OpenAI response", openaiResponse.response);
                 const endTime = performance.now();
                 console.log(`API request took ${endTime - startTime} milliseconds`);
                 setMessages((current) => [...current, 
@@ -142,13 +142,13 @@ return (
         {/* <VideoUpload onUpload={handleVideoUpload}/> */}
     </div>
     <div className="space-y-4 mt-4">
-        <div className="flex flex-col-reverse gap-y-4">
+        {/* <div className="flex flex-col-reverse gap-y-4">
             {messages.map((message, index) =>(
                 <div key={index}>
                     {typeof message === 'string' ? message : JSON.stringify(message)}
                 </div>
             ))}
-        </div>
+        </div> */}
     </div>
     <div className="mt-8">
                     <h2 className="text-xl font-bold">Your Notes</h2>

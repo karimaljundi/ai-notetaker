@@ -28,8 +28,6 @@ export default function AIChatPage() {
       noteId: selectedNote
     }
   })
-console.log("user", typeof session?.user?.email)
-console.log("id", session?.user?.email)
   useEffect(() => {
     const fetchNotes = async () => {
       try {

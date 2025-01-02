@@ -20,14 +20,36 @@ try {
     if (!messages){
         return new NextResponse("Messages not provided", { status: 400 });
     }
-    const authen = await auth();
-    const checkApiLimitUser = await checkApiLimit(authen?.id)
-    if (!checkApiLimitUser){
-      alert("API Limit exceeded")
-      return new NextResponse("[API LIMIT EXCEEDED]", { status: 429 });
-    }
     
-    const response = await openai.chat.completions.create({
+    const verificationResponse = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+          {
+              role: "system",
+              content: "You are a content classifier. Analyze the given transcript and determine if it's from an educational lecture. Respond with a JSON object containing: isLecture (boolean)."
+          },
+          {
+              role: "user",
+              content: transcript
+          }
+      ],
+      response_format: {
+        type: "json_object"
+      }
+  });
+  console.log("Verification response", verificationResponse.choices[0].message.content);
+  console.log("type of verification response", typeof verificationResponse.choices[0].message.content);
+  const verified = JSON.parse(verificationResponse.choices[0].message.content);
+  const authen = await auth();
+  const checkApiLimitUser = await checkApiLimit(authen?.id)
+  if (!checkApiLimitUser){
+    return new NextResponse("[API LIMIT EXCEEDED]", { status: 429 });
+  }
+  if (!verified.isLecture){
+    return new NextResponse("Transcript is not from an educational lecture", { status: 400 });
+  }
+
+  const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -41,7 +63,12 @@ try {
         },
         {
           "role": "user",
-          "content": transcript
+          "content": [
+            {
+              "type": "text",
+              "text": transcript
+            }
+          ]
         }
       ],
       response_format: {

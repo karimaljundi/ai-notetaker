@@ -16,6 +16,7 @@ export const FreeCounter = ({apiLimitCount=0} : FreeCounterProps) => {
         setMounted(true);
     }, []);
     if (!mounted) return null;
+    console.log("FreeCounterProps:", apiLimitCount);
     return(
         <div className="px-3">
             <Card className="bg-black border-0">
@@ -24,7 +25,7 @@ export const FreeCounter = ({apiLimitCount=0} : FreeCounterProps) => {
                     <p>
                         {apiLimitCount} / {MAX_FREE_COUNTS} Free Generations
                     </p>
-                    <Progress className="h-3" value={(apiLimitCount / MAX_FREE_COUNTS) * 100}/>
+                    <Progress className="h-3" value={(apiLimitCount.value / MAX_FREE_COUNTS) * 100}/>
                 </div>
                 <Button className="w-full" variant="premium">
                     Upgrade
