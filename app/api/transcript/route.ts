@@ -8,12 +8,15 @@ export async function POST(req: Request, userId: string) {
     try {
         const session = await auth();
         const body = await req.json();
-        const { videoUrl } = body; // Expecting videoUrl from the request body
+        let { videoUrl } = body; // Expecting videoUrl from the request body
         let compiledTranscript = "";
         if (!userId) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
-
+        if (videoUrl.includes('youtu.be')) {
+            const id = videoUrl.split('youtu.be/')[1]?.split('?')[0];
+            videoUrl = `https://www.youtube.com/watch?v=${id}`;
+        }
         if (!videoUrl) {
             return new NextResponse("YouTube URL not provided", { status: 400 });
         }

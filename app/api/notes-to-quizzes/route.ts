@@ -12,8 +12,8 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { messages, note, prompt } = body;
         // console.log("Received request body:", body);
-        console.log("messages:", messages);
-        console.log("note:", note);
+        console.log("messages in quiz:", messages);
+        console.log("note in quiz:", JSON.stringify(note));
         console.log("prompt in ai:", prompt);
 
         if (!openai.apiKey) {
@@ -58,17 +58,28 @@ const response = await openai.chat.completions.create({
     messages: [
         {
             role: "system",
-            content: `Prompt: Extract and synthesize key concepts, terms, and ideas from the provided lecture notes, user inputs, and previously created quizzes. Use this information to generate multiple-choice questions (MCQs) with the following format:
-- A question that tests the understanding, application, or analysis of a concept.
-- Four answer options, including one correct answer and three plausible distractors.
+            content: `
+            If the user's prompt is unclear or not specific:
+- Focus on definition and concept-based questions
+- Extract key terms and create questions about them
+- Test understanding of fundamental principles
+- Include application-based questions
 
-Key guidelines:
-1. **Reference Integration**: Use content from the provided lecture notes and incorporate previous quizzes (if available) to avoid redundancy and ensure variety.
-2. **Answer Options**:
-   - Ensure one correct answer is clearly identifiable.
-   - Provide three plausible distractors that are logical and relevant but incorrect.
-   - Use examples or real-world scenarios in questions and options when appropriate.
-3. **JSON Format**: Structure the output as a valid JSON object:
+Create questions with:
+1. Clear, unambiguous wording
+2. One definitively correct answer
+3. Three plausible but incorrect options
+4. Mix of difficulties (Basic recall, Understanding, Application)
+
+Validation Rules:
+1. No duplicate questions from previous ones
+2. All questions must come from the note content
+3. Options must be distinct and clear
+4. Correct answer must be unambiguous
+
+Note content: ${JSON.stringify(note)}
+
+ **JSON Format**: Structure the output as a valid JSON object:
 {
   "questions": [
     {
@@ -93,18 +104,15 @@ Key guidelines:
     }
   ]
 }
-4. **Conciseness and Focus**:
-   - Ensure questions and options are clear, concise, and relevant.
-   - Avoid overly ambiguous or tricky phrasing unless justified by difficulty level.
-5. **Validation**:
-   - Verify that each question has exactly one correct answer and three plausible distractors.
-   - Conclude with a fully valid and error-free JSON object.
-
 Provide a variety of questions that effectively test understanding across difficulty levels and validate the final JSON structure to ensure correctness.`
         },
         {
             role: "user",
             content: JSON.stringify(note) + "\n" + prompt + "\n" + JSON.stringify(messages)
+        },
+        {
+          "role": "user",
+          content: JSON.stringify(messages)
         }
     ],
     response_format: { type: "json_object"},

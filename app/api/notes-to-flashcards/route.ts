@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { checkApiLimit, increaseLimit } from "@/lib/handleNote";
+import { addFlashcards, checkApiLimit, increaseLimit } from "@/lib/handleNote";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
@@ -11,6 +11,9 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
         const { messages, note, prompt } = body;
+        console.log("note", note);
+        console.log("prompt", prompt);
+        console.log("messages", messages);
         if (!openai.apiKey) {
             return new NextResponse("OpenAI Key not configured", { status: 500 });
         }
@@ -20,6 +23,7 @@ export async function POST(req: Request) {
             console.log("[API LIMIT REACHED]");
             return new NextResponse("Free trial limit reached", {status: 403});
         }
+        
 //         const placeholderResponse =`{
 //   "flashcards": [
 //     {
@@ -79,17 +83,34 @@ const response = await openai.chat.completions.create({
                 {
                     role: "system",
                     content: `Prompt: Extract key concepts, terms, and ideas from the provided lecture notes or content.
-For each key concept or term, create a flashcard with:
-A question that prompts the user to recall or explain the concept.
-An answer that provides a concise yet comprehensive explanation or definition.
-Ensure the flashcards have a mixture of difficulty levels:
-Easy: Questions that test basic recall or definitions.
-Medium: Questions that require understanding or application of concepts.
-Hard: Questions that involve deeper analysis, examples, or synthesis of ideas.
-Include a difficulty key in each flashcard with values easy, medium, or hard.
+If the user's prompt is unclear or not specific:
+- Focus on creating definition-based flashcards
+- Extract key terms and their explanations
+- Create concept-explanation pairs
+- Include fundamental principles
+
+Create flashcards with:
+- A question that prompts the user to recall or explain the concept
+- An answer that provides a concise yet comprehensive explanation or definition
+- Ensure the flashcards have a mixture of difficulty levels (Easy, Medium, and Hard)
+- Include a difficulty key in each flashcard with values easy, medium, or hard
+
+Priority for unclear prompts:
+1. Key term definitions
+2. Core concepts explained
+3. Fundamental principles
+4. Important relationships between concepts
+
 When examples are available in the notes:
-Incorporate them into the answer for clarity and context.
-Optionally, create additional flashcards based on examples for deeper understanding.
+- Incorporate them into the answer for clarity and context
+
+Main note content: ${JSON.stringify(note)}
+
+Rules:
+1. Only use information from the provided note
+2. Each flashcard must directly relate to the main topic
+3. Verify each card against source content
+4. Don't mix in external knowledge
 Structure the output as a JSON object with the following format:
 {
   "flashcards": [
@@ -105,6 +126,17 @@ Structure the output as a JSON object with the following format:
     }
   ]
 }
+  Rules for avoiding duplicates:
+1. Do not create cards with questions identical to previous ones
+2. Do not create cards that ask the same concept in slightly different wording
+3. If a concept has been covered, focus on uncovered aspects
+4. Each card must be substantially different from existing ones
+
+Create flashcards with:
+- Unique questions not present in previous cards
+- Clear, distinct concepts
+- Different aspects of topics already covered
+- New perspectives on the material
 Balance the flashcards to include an appropriate number of questions for each difficulty level, ensuring a variety of challenges.
 Ensure all questions are straightforward and relevant to the content provided, suitable for quick review or study.
 Avoid adding extraneous information not present in the notes.
@@ -112,8 +144,9 @@ End the response with a valid JSON object.`
                 },
                 {
                     role: "user",
-                    content: JSON.stringify(note) + "\n" + prompt + "\n" + JSON.stringify(messages)
-                }
+                    content: JSON.stringify(messages)
+                },
+               
             ],
             temperature: 1,
             max_tokens: 2048,

@@ -51,6 +51,7 @@ export async function getNoteById(id: string){
 export async function addFlashcards(noteId: string, flashcards: any) {
     console.log("noteId", noteId);
     console.log("flashcards type", typeof flashcards);
+    console.log("flashcards", flashcards);
 
     let flashcardArray;
     if (typeof flashcards === 'string') {

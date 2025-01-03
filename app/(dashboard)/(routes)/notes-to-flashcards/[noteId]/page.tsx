@@ -30,7 +30,7 @@ function FlashcardsPage({params}: {params: Promise<{ noteId: string }>}) {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     useEffect(() => {
-        fetchFlashcards(); 
+        fetchFlashcards(); fetchNotes();
     }, [noteId]);
     const currentFlashcard = flashcards[currentIndex];
 
@@ -111,8 +111,9 @@ const handleGenerate = async (values: z.infer<typeof formSchema>) => {
     } catch (error) {
         console.error("Error creating flashcards:", error);
         alert("An error occurred while creating flashcards.");
-    
-};
+}finally {
+    router.refresh();
+}
 }
     const handleSave = async () => {
         try {

@@ -14,6 +14,7 @@ import { formSchema } from '../../lecture-to-notes/constants';
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
 import { Select, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SelectContent } from '@radix-ui/react-select';
+import { useRouter } from 'next/navigation';
 
 
 function FlashcardsPage({params}: {params: Promise<{ noteId: string }>}) {
@@ -26,6 +27,7 @@ function FlashcardsPage({params}: {params: Promise<{ noteId: string }>}) {
     const [loading, setLoading] = useState(true);
     const [quizResults, setQuizResults] = useState<{[key: number]: boolean | null}>({});
     const [attemptedQuestions, setAttemptedQuestions] = useState<Set<number>>(new Set());
+    const router = useRouter();
     interface QuizAnswer {
         questionIndex: number;
         selectedAnswer: string;
@@ -138,7 +140,9 @@ const handleGenerate = async (values: z.infer<typeof formSchema>) => {
         console.error("Error creating quizzes:", error);
         alert("An error occurred while creating quizzes.");
     
-};
+}finally{
+    router.refresh();
+}
 }
 const handleSave = async () => {
         try {

@@ -14,7 +14,7 @@ export async function POST(req: Request){
     const {messages, noteId} = await req.json();
     const note = await getNoteById(noteId);
     const noteContent = JSON.parse(note).content;
-    // console.log("note:", noteContent);
+    console.log("note:", noteContent);
     const authen = await auth();
             const freeTrial = await checkApiLimit(authen?.id as string);
             if (!freeTrial){
