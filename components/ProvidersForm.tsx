@@ -11,12 +11,12 @@ export default function ProvidersForm() {
           Sign in with Google
         </Button>
       </form>
-      <form action={doLogin}>
+      {/* <form action={doLogin}>
         <Button className="w-full" variant="outline" name="action" value="apple">
           <FaApple className="mr-2 h-4 w-4" />
           Sign in with Apple
         </Button>
-      </form>
+      </form> */}
     </div>
   )
 }

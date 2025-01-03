@@ -25,21 +25,21 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
   };
 
   return (
-    <div className="flex justify-center items-center">
-      <Card className="w-full max-w-2xl">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-xl font-bold leading-tight break-words">
+    <div className="flex justify-center items-center p-4 w-full">
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardHeader className="pb-2 p-4 sm:p-6">
+          <CardTitle className="text-lg sm:text-xl font-bold leading-tight break-words">
             {question}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-3">
+        <CardContent className="space-y-3 p-4 sm:p-6">
+          <div className="grid gap-2 sm:gap-3">
             {answers.map((answer, index) => (
               <Button
                 key={index}
                 onClick={() => handleAnswerClick(answer)}
                 disabled={!!feedback}
-                className="min-h-[2.5rem] h-auto whitespace-normal text-left break-words"
+                className="min-h-[3rem] px-3 py-2 h-auto text-sm sm:text-base whitespace-normal text-left break-words"
                 variant={
                   feedback
                     ? answer === correctAnswer
@@ -55,7 +55,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
             ))}
           </div>
           {feedback && (
-            <p className={`mt-2 text-sm font-medium ${
+            <p className={`mt-4 text-sm sm:text-base font-medium ${
               feedback.startsWith("Correct") ? "text-green-600" : "text-red-600"
             }`}>
               {feedback}

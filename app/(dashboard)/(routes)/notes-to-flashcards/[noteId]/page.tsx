@@ -191,55 +191,41 @@ const handleGenerate = async (values: z.infer<typeof formSchema>) => {
                         <CardTitle className="text-3xl font-bold">Create Your First Flashcard</CardTitle>
                         <CardDescription>Get started with your study materials</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <Tabs defaultValue="create">
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="create">Create Manually</TabsTrigger>
-                                <TabsTrigger value="generate">Generate with AI</TabsTrigger>
-                            </TabsList>
-                            
-                            <TabsContent value="create" className="space-y-4">
-                                <Input
-                                    placeholder="Question"
-                                    value={newFlashcard.question}
-                                    onChange={(e) => setNewFlashcard({ ...newFlashcard, question: e.target.value })}
-                                />
-                                <Input
-                                    placeholder="Answer"
-                                    value={newFlashcard.answer}
-                                    onChange={(e) => setNewFlashcard({ ...newFlashcard, answer: e.target.value })}
-                                />
-                                <Select
-                                    value={newFlashcard.difficulty}
-                                    onValueChange={(value) => setNewFlashcard({ ...newFlashcard, difficulty: value })}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select difficulty" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="easy">Easy</SelectItem>
-                                        <SelectItem value="medium">Medium</SelectItem>
-                                        <SelectItem value="hard">Hard</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <Button onClick={handleCreate} className="w-full">
-                                    <Plus className="mr-2 h-4 w-4" /> Create Flashcard
-                                </Button>
-                            </TabsContent>
-    
-                            <TabsContent value="generate" className="space-y-4">
-                                <form onSubmit={form.handleSubmit(handleGenerate)}>
-                                    <Input
-                                        {...form.register("prompt")}
-                                        placeholder="Enter prompt to generate flashcards..."
-                                    />
-                                    <Button type="submit" className="w-full mt-4">
-                                        <Wand2 className="mr-2 h-4 w-4" /> Generate Flashcards
-                                    </Button>
-                                </form>
-                            </TabsContent>
-                        </Tabs>
-                    </CardContent>
+                    // In the return statement, modify the CardContent section like this:
+<CardContent className="p-4">
+    <div className="flex flex-col gap-4">
+        {/* Flashcard container */}
+        <div className="w-full max-w-2xl mx-auto">
+            <Flashcard
+                front={currentFlashcard.question}
+                back={currentFlashcard.answer}
+                difficulty={currentFlashcard.difficulty}
+                isFlipped={isFlipped}
+                onFlip={handleFlip}
+            />
+        </div>
+
+        {/* Navigation buttons below the flashcard */}
+        <div className="flex justify-center gap-4 mt-4">
+            <Button
+                variant="outline"
+                onClick={handlePrev}
+                className="w-[60px] h-[36px] px-2"
+            >
+                <ChevronLeft className="h-4 w-4" /> Prev
+            </Button>
+
+            <Button
+                variant="outline"
+                onClick={handleNext}
+                className="w-[60px] h-[36px] px-2"
+            >
+                Next <ChevronRight className="h-4 w-4" />
+            </Button>
+        </div>
+    </div>
+</CardContent>
+
                 </Card>
             </div>
         );
@@ -251,49 +237,44 @@ const handleGenerate = async (values: z.infer<typeof formSchema>) => {
     
     return (
         <div className="container mx-auto p-6 max-w-5xl">
-            <Card className="mb-8">
-                <CardHeader>
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <CardTitle className="text-3xl font-bold">Flashcard Management</CardTitle>
-                            <CardDescription>Note ID: {noteId}</CardDescription>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-sm text-muted-foreground">
-                                Card {currentIndex + 1} of {flashcards.length}
-                            </div>
-                        </div>
+            <Card className="w-full">
+            <CardHeader>
+                <div className="flex justify-between items-center">
+                    <CardTitle>Flashcards</CardTitle>
+                    <div className="text-sm text-muted-foreground">
+                        Card {currentIndex + 1} of {flashcards.length}
                     </div>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center gap-4 mb-8">
-                        <Button
-                            variant="outline"
-                            size="lg"
-                            onClick={handlePrev}
-                        >
-                            <ChevronLeft className="mr-2" /> Previous
-                        </Button>
-    
-                        <div className="flex-1">
-                            <Flashcard
-                                front={currentFlashcard.question}
-                                back={currentFlashcard.answer}
-                                difficulty={currentFlashcard.difficulty}
-                                isFlipped={isFlipped}
-                                onFlip={handleFlip}
-                            />
-                        </div>
-    
-                        <Button
-                            variant="outline"
-                            size="lg"
-                            onClick={handleNext}
-                        >
-                            Next <ChevronRight className="ml-2" />
-                        </Button>
+                </div>
+            </CardHeader>
+            <CardContent className="p-6">
+                <div className="grid grid-cols-[auto_1fr_auto] gap-4 items-center">
+                    <Button
+                        variant="outline"
+                        onClick={handlePrev}
+                        className="w-[65px]"
+                    >
+                        <ChevronLeft className="mr-2" /> Prev
+                    </Button>
+
+                    <div className="w-full max-w-2xl mx-auto">
+                        <Flashcard
+                            front={currentFlashcard.question}
+                            back={currentFlashcard.answer}
+                            difficulty={currentFlashcard.difficulty}
+                            isFlipped={isFlipped}
+                            onFlip={handleFlip}
+                        />
                     </div>
-                </CardContent>
+
+                    <Button
+                        variant="outline"
+                        onClick={handleNext}
+                        className="w-[65px]"
+                    >
+                        Next <ChevronRight className="ml-2" />
+                    </Button>
+                </div>
+            </CardContent>
             </Card>
             <Tabs defaultValue="edit" className="mb-8">
             <TabsList className="grid w-full grid-cols-3">

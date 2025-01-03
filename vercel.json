@@ -1,17 +1,16 @@
 {
-    "functions": {
-      "app/api/lecture-to-notes/route.ts": {
-        "maxDuration": 60
-      },
-      "app/api/lecture-to-quizzes/route.ts": {
-        "maxDuration": 60
-      },
-      "app/api/lecture-to-flashcards/route.ts": {
-        "maxDuration": 60
-      },
-      "app/api/chat/route.ts": {
-        "maxDuration": 60
-      }
+  "functions": {
+    "app/api/lecture-to-notes/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/notes-to-quizzes/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/notes-to-flashcards/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/chat/route.ts": {
+      "maxDuration": 60
     }
   }
-  
+}

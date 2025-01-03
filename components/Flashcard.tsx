@@ -29,22 +29,22 @@ const Flashcard: React.FC<FlashcardProps> = ({
   };
 
   return (
-    <Card className="w-full max-w-2xl relative" onClick={onFlip}>
+    <Card className="w-full max-w-2xl mx-auto relative">
       <Badge 
-        className={`absolute top-2 right-2 ${getDifficultyColor(difficulty)}`}
+        className={`absolute top-3 right-3 text-xs sm:text-sm px-2 py-1 ${getDifficultyColor(difficulty)}`}
       >
         {difficulty}
       </Badge>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-bold leading-tight break-words">
+      <CardHeader className="pb-2 p-4 sm:p-6">
+        <CardTitle className="text-lg sm:text-xl font-bold leading-tight break-words min-h-[4rem]">
           {isFlipped ? back : front}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 sm:p-6">
         <Button
           onClick={onFlip}
           variant="outline"
-          className="w-full mt-4"
+          className="w-full mt-2 sm:mt-4 text-sm sm:text-base py-2 sm:py-3"
         >
           {isFlipped ? "Show Question" : "Show Answer"}
         </Button>
