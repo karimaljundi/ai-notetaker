@@ -183,53 +183,48 @@ const handleGenerate = async (values: z.infer<typeof formSchema>) => {
         );
     }
 
-    if (!flashcards || flashcards.length === 0) {
-        return (
-            <div className="container mx-auto p-6 max-w-5xl">
-                <Card className="w-full mb-6">
-                    <CardHeader>
-                        <CardTitle className="text-3xl font-bold">Create Your First Flashcard</CardTitle>
-                        <CardDescription>Get started with your study materials</CardDescription>
-                    </CardHeader>
-                    // In the return statement, modify the CardContent section like this:
-<CardContent className="p-4">
-    <div className="flex flex-col gap-4">
-        {/* Flashcard container */}
-        <div className="w-full max-w-2xl mx-auto">
-            <Flashcard
-                front={currentFlashcard.question}
-                back={currentFlashcard.answer}
-                difficulty={currentFlashcard.difficulty}
-                isFlipped={isFlipped}
-                onFlip={handleFlip}
-            />
+if (!flashcards || flashcards.length === 0) {
+    return (
+        <div className="container mx-auto p-6 max-w-5xl">
+            <Card className="w-full mb-6">
+                <CardHeader>
+                    <CardTitle className="text-3xl font-bold">Create Your First Flashcard</CardTitle>
+                    <CardDescription>Get started with your study materials</CardDescription>
+                </CardHeader>
+                <CardContent className="p-4">
+                    <div className="space-y-4">
+                        <Input
+                            placeholder="Question"
+                            value={newFlashcard.question}
+                            onChange={(e) => setNewFlashcard({ ...newFlashcard, question: e.target.value })}
+                        />
+                        <Input
+                            placeholder="Answer"
+                            value={newFlashcard.answer}
+                            onChange={(e) => setNewFlashcard({ ...newFlashcard, answer: e.target.value })}
+                        />
+                        <Select
+                            value={newFlashcard.difficulty}
+                            onValueChange={(value) => setNewFlashcard({ ...newFlashcard, difficulty: value })}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select difficulty" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="easy">Easy</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="hard">Hard</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Button onClick={handleCreate} className="w-full">
+                            <Plus className="mr-2 h-4 w-4" /> Create Flashcard
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
-
-        {/* Navigation buttons below the flashcard */}
-        <div className="flex justify-center gap-4 mt-4">
-            <Button
-                variant="outline"
-                onClick={handlePrev}
-                className="w-[60px] h-[36px] px-2"
-            >
-                <ChevronLeft className="h-4 w-4" /> Prev
-            </Button>
-
-            <Button
-                variant="outline"
-                onClick={handleNext}
-                className="w-[60px] h-[36px] px-2"
-            >
-                Next <ChevronRight className="h-4 w-4" />
-            </Button>
-        </div>
-    </div>
-</CardContent>
-
-                </Card>
-            </div>
-        );
-    }
+    );
+}
     
     
 

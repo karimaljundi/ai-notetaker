@@ -5,6 +5,7 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +38,7 @@ export default async function RootLayout({
       >
         {children}
         <Analytics />
+        <SpeedInsights/>
       </body>
     </html>
     </SessionProvider> 
