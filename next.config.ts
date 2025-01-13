@@ -1,6 +1,9 @@
 import { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  compiler: {
+    styledComponents: true,
+  },
   theme: {
     extend: {},
   },
