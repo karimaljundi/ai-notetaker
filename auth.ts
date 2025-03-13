@@ -50,39 +50,58 @@ export const {
         Credentials({
             name: "Credentials",
             credentials: {
-                name: { label: "Name", type: "text" },
                 email: { label: "Email", type: "email" },
                 password: { label: "Password", type: "password" },
+                name: { label: "Name", type: "text" }
             },
-            authorize: async (credentials) => {
-                if (!credentials || !credentials.email || !credentials.password) {
+            async authorize(credentials) {
+                if (!credentials?.email || !credentials?.password) {
                     return null;
                 }
-                const email = credentials.email as string;
-                const hash = saltAndHashPassword(credentials.password.toString());
-                const name = credentials.name as string;
 
-                let user = await db.user.findUnique({ where: { email } });
-                // let user = await sql`SELECT * FROM User WHERE email = ${email}`;
-                if (!user) {
-                    user = await db.user.create({
-                        data: {
-                            name,
-                            email,
-                            hashedPassword: hash,
-                            Provider: "Credentials",
-                        },
+                try {
+                    const user = await db.user.findUnique({
+                        where: { email: credentials.email }
                     });
-                    // user = await sql`INSERT INTO User (name, email, hashedPassword, Provider) VALUES (${name}, ${email}, ${hash}, 'Credentials')`;
-                } else {
-                    const isMatch = bcrypt.compareSync(credentials.password as string, user.hashedPassword?.toString() as string);
-                    if (!isMatch) {
-                        return new Error("Password does not match");
+
+                    if (!user || !user.password) {
+                        // Create user if doesn't exist (for testing/development)
+                        if (process.env.NODE_ENV !== "production" && credentials.name) {
+                            const newUser = await db.user.create({
+                                data: {
+                                    email: credentials.email,
+                                    name: credentials.name,
+                                    password: await bcrypt.hash(credentials.password, 10),
+                                    role: "ADMIN"
+                                }
+                            });
+                            return {
+                                id: newUser.id,
+                                email: newUser.email,
+                                name: newUser.name,
+                                role: newUser.role
+                            };
+                        }
+                        return null;
                     }
+
+                    const passwordMatch = await bcrypt.compare(credentials.password, user.password);
+                    if (!passwordMatch) {
+                        return null;
+                    }
+
+                    return {
+                        id: user.id,
+                        email: user.email,
+                        name: user.name,
+                        role: user.role
+                    };
+                } catch (error) {
+                    console.error("Error in authorize function:", error);
+                    return null;
                 }
-                return user;
-            },
-        }),
+            }
+        })
     ],
     callbacks: {
         async jwt({ token,trigger, user }) {
@@ -114,5 +133,8 @@ export const {
           return session;
         },
       },
+    pages: {
+        signIn: "/sign-in",
+    },
         
 });

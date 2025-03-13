@@ -3,7 +3,7 @@ import { signIn, signOut } from "@/auth";
 import { db } from "@/db";
 import { AuthError } from "next-auth";
 import { revalidatePath } from "next/cache";
-
+import { redirect } from "next/navigation";
 
 export async function doLogin(formData: FormData){
     const action = formData.get('action');
@@ -32,31 +32,35 @@ const getUserByEmail = async (email : string)=>{
     }
 }
 export const loginWithCreds = async (formData: FormData): Promise<void> => {
-    const rawFormData = {
-      email: formData.get("email"),
-      password: formData.get("password"),
-      name: formData.get("name"),
-      role: "ADMIN",
-      redirectTo: "/dashboard",
-    };
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const name = formData.get("name") as string;
   
-    const existingUser = await getUserByEmail(formData.get("email") as string);
-    // console.log(existingUser);
-  
-    try {
-      await signIn("credentials", rawFormData);
-    } catch (error: unknown) {
-      if (error instanceof AuthError) {
-        switch (error.type) {
-          case "CredentialsSignin":
-            console.error("Invalid credentials");
-            break; 
-          default:
-            console.error("Error:", error);
-        }
+  const existingUser = await getUserByEmail(email);
+  // console.log(existingUser);
+
+  try {
+    // The correct way to use signIn in a server action
+     signIn("credentials", { 
+      email, 
+      password,
+      name,
+      redirect: false // Important: don't auto-redirect in server action
+    });
+    
+    // Handle redirect manually after successful authentication
+    redirect("/dashboard");
+  } catch (error: unknown) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case "CredentialsSignin":
+          console.error("Invalid credentials");
+          break; 
+        default:
+          console.error("Error:", error);
       }
-  
-      throw error;
     }
-    revalidatePath("/");
-  };
+
+    throw error;
+  }
+};
