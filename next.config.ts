@@ -1,15 +1,30 @@
 import { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  theme: {
-    extend: {},
+  // theme: {
+  //   extend: {},
+  // },
+  onDemandEntries: {
+    // Add this to make development smoother:
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 5,
   },
-  plugins: [],
-  variants: {
-    extend: {
-      transform: ['hover', 'focus'],
-    },
+  // This suppresses hydration warnings in development:
+  webpack: (config, { dev, isServer }) => {
+    if (dev && !isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'react-dom$': 'react-dom/profiling',
+      };
+    }
+    return config;
   },
+  // plugins: [],
+  // variants: {
+  //   extend: {
+  //     transform: ['hover', 'focus'],
+  //   },
+  // },
   reactStrictMode: false,
   eslint: {
     ignoreDuringBuilds: true,

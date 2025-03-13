@@ -5,6 +5,7 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
 import { Analytics } from "@vercel/analytics/react"
+import SuppressHydrationWarning from "@/components/suppress-hydration-warning";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +36,9 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <SuppressHydrationWarning>
         {children}
+        </SuppressHydrationWarning>
         <Analytics />
       </body>
     </html>
