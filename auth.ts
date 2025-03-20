@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import Credentials from 'next-auth/providers/credentials';
+import CredentialsProvider from 'next-auth/providers/credentials';
 import { saltAndHashPassword } from "./lib/utils";
 import { db } from "./db";
 import bcrypt from "bcryptjs";
@@ -16,6 +16,13 @@ export const {
 } = NextAuth({
     // adapter: PrismaAdapter(db),
     secret: process.env.SECRET,
+    pages: {
+        signIn: '/login',
+        // signOut: '/auth/signout',
+        // error: '/auth/error',
+        // verifyRequest: '/auth/verify-request',
+        // newUser: '/auth/new-user'
+    },
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID,
@@ -47,14 +54,14 @@ export const {
                 return user;
             },
         }),
-        Credentials({
+        CredentialsProvider({
             name: "Credentials",
             credentials: {
                 name: { label: "Name", type: "text" },
                 email: { label: "Email", type: "email" },
                 password: { label: "Password", type: "password" },
             },
-            authorize: async (credentials) => {
+            async authorize(credentials) {
                 if (!credentials || !credentials.email || !credentials.password) {
                     return null;
                 }
@@ -77,7 +84,7 @@ export const {
                 } else {
                     const isMatch = bcrypt.compareSync(credentials.password as string, user.hashedPassword?.toString() as string);
                     if (!isMatch) {
-                        return new Error("Password does not match");
+                        throw new Error("Invalid credentials");
                     }
                 }
                 return user;
@@ -85,34 +92,45 @@ export const {
         }),
     ],
     callbacks: {
-        async jwt({ token,trigger, user }) {
-
-            
-          // Persist the OAuth access_token to the token right after signin
-          if (user) {           
-            token.apiLimit = user.apiLimit;
-            token.id = user.id;
-            if (trigger==="update"){
+        async jwt({ token, trigger, user }) {
+            // Persist the OAuth access_token to the token right after signin
+            if (user) {           
                 token.apiLimit = user.apiLimit;
+                token.id = user.id;
+                if (trigger === "update") {
+                    token.apiLimit = user.apiLimit;
+                }
+                // token.accessToken = user.token;
+                const dbUser = await db.user.findUnique({
+                    where: { email: token.email as string },
+                    select: { id: true }
+                });
+                if (dbUser) {
+                    token.id = dbUser.id;
+                }
             }
-            // token.accessToken = user.token;
-            const dbUser = await db.user.findUnique({
-                where: { email: token.email as string },
-                select: { id: true }
-            });
-            if (dbUser) {
-                token.id = dbUser.id;
-            }
-          }
-          
-          return token;
+            
+            return token;
         },
         async session({ session, token, user }) {
             session.apiLimit = token.apiLimit;
             session.id = token.id;
 
-          return session;
+            return session;
         },
-      },
-        
+        async redirect({ url, baseUrl }) {
+            // Force redirect to dashboard after any successful sign-in
+            if (url.includes('/login') || url === baseUrl || url.startsWith(baseUrl + '?')) {
+                return `${baseUrl}/dashboard`;
+            }
+            
+            // Handle callback URLs that might contain auth-related paths
+            if (url.includes('/api/auth/') || url.includes('/signin')) {
+                return `${baseUrl}/dashboard`;
+            }
+            
+            // Otherwise respect the requested URL if it's on the same site
+            return url.startsWith(baseUrl) ? url : `${baseUrl}/dashboard`;
+        }
+    },
 });
