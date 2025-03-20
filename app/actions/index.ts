@@ -3,60 +3,55 @@ import { signIn, signOut } from "@/auth";
 import { db } from "@/db";
 import { AuthError } from "next-auth";
 import { revalidatePath } from "next/cache";
-
+import { redirect } from "next/navigation";
 
 export async function doLogin(formData: FormData){
     const action = formData.get('action');
     if (action) {
         await signIn(action.toString(), { redirectTo: "/dashboard" });
-        
     } else {
         console.error("Action is null"); 
     }
-
-    // console.log(action);
     revalidatePath("/dashboard");
-
 }
+
 export async function doLogout(){
     await signOut({ redirectTo: "/" });
     revalidatePath("/");
 }
+
 const getUserByEmail = async (email : string)=>{
     try {
         const user = await db.user.findUnique({where: {email,},});
         return user;
     } catch (error) {
-        // console.log("Error:", error);
         return null;
     }
 }
-export const loginWithCreds = async (formData: FormData): Promise<void> => {
-    const rawFormData = {
-      email: formData.get("email"),
-      password: formData.get("password"),
-      name: formData.get("name"),
-      role: "ADMIN",
-      redirectTo: "/dashboard",
-    };
-  
-    const existingUser = await getUserByEmail(formData.get("email") as string);
-    // console.log(existingUser);
-  
-    try {
-      await signIn("credentials", rawFormData);
-    } catch (error: unknown) {
-      if (error instanceof AuthError) {
-        switch (error.type) {
-          case "CredentialsSignin":
-            console.error("Invalid credentials");
-            break; 
-          default:
-            console.error("Error:", error);
-        }
-      }
-  
-      throw error;
-    }
-    revalidatePath("/");
+
+export const loginWithCreds = async (formData: FormData) => {
+  const rawFormData = {
+    email: formData.get("email"),
+    password: formData.get("password"),
+    name: formData.get("name"),
+    role: "ADMIN",
   };
+
+  try {
+    // Remove redirect options to avoid the CallbackRouteError
+    await signIn("credentials", rawFormData);
+    
+    // Instead manually redirect after successful authentication
+    redirect("/dashboard");
+  } catch (error: unknown) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case "CredentialsSignin":
+          throw new Error("Invalid credentials");
+        default:
+          throw error;
+      }
+    }
+    throw error;
+  }
+}
